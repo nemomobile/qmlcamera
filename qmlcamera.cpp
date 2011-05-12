@@ -43,6 +43,7 @@
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/QDeclarativeEngine>
 #include <QDeclarativeContext>
+#include <QDebug>
 
 #if !defined(QT_NO_OPENGL)
 #include <QtOpenGL/QGLWidget>
@@ -72,7 +73,7 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setOrganizationName("Nokia");
     QCoreApplication::setOrganizationDomain("nokia.com");
-    QCoreApplication::setApplicationName("meegocamera");
+    QCoreApplication::setApplicationName("meego-de-camera");
     QmlCameraSettings settings;
 
     const QString mainQmlApp = QLatin1String("qrc:/declarative-camera.qml");

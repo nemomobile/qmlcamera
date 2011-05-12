@@ -2,6 +2,8 @@ TEMPLATE=app
 
 CONFIG+=meego
 
+DEFINES+=Q_WS_MEEGO
+
 QT += declarative network opengl
 
 HEADERS += \
