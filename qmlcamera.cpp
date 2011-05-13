@@ -44,15 +44,34 @@
 #include <QtDeclarative/QDeclarativeEngine>
 #include <QDeclarativeContext>
 #include <QDebug>
+#include <QLocalSocket>
 
 #if !defined(QT_NO_OPENGL)
 #include <QtOpenGL/QGLWidget>
 #endif
 
-#include "qmlcamerasettings.h"
+
+#include "gpiokeyslistener.h"
+
+
+
+
+
 
 int main(int argc, char *argv[])
 {
+   QLocalSocket *socket = new QLocalSocket();
+   socket->connectToServer(SERVER_NAME);
+   if (socket->state())
+   {
+       socket->close();
+       return 0;
+   }
+   socket->close();
+
+
+
+
 
 #if defined (Q_WS_X11) || defined (Q_WS_MAC) || defined (Q_OS_SYMBIAN)
     //### default to using raster graphics backend for now
@@ -69,11 +88,27 @@ int main(int argc, char *argv[])
         QApplication::setGraphicsSystem("raster");
 #endif
 
+
+
+    bool uiVisible = true;
+
+    for (int i = 0; i < argc; ++i) {
+        QString arg = argv[i];
+        if (arg == "-background") {
+            uiVisible = false;
+            break;
+        }
+    }
+
     QApplication application(argc, argv);
 
     QCoreApplication::setOrganizationName("Nokia");
     QCoreApplication::setOrganizationDomain("nokia.com");
     QCoreApplication::setApplicationName("meego-de-camera");
+
+    GpioKeysListener qpiokeyslistener(uiVisible);
+
+    /*
     QmlCameraSettings settings;
 
     const QString mainQmlApp = QLatin1String("qrc:/declarative-camera.qml");
@@ -95,6 +130,7 @@ int main(int argc, char *argv[])
     view.setGeometry(QRect(100, 100, 800, 480));
     view.show();
 #endif
+*/
     return application.exec();
 }
 
