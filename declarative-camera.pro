@@ -17,4 +17,7 @@ target.path=/usr/bin
 
 RESOURCES += declarative-camera.qrc
 
-INSTALLS += target
+app_icon.files = meegocamera.desktop
+app_icon.path = /usr/share/applications
+
+INSTALLS += target app_icon
