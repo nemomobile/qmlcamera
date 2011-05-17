@@ -40,10 +40,10 @@
 /*
  * lea  --  helper for address + offset calculations
  */
-static inline void *lea(void *base, int offs)
-{
-    return ((char *)base) + offs;
-}
+//static inline void *lea(void *base, int offs)
+//{
+//    return ((char *)base) + offs;
+//}
 
 GpioKeysListener::GpioKeysListener(bool visible): QObject(), // int argc, char**argv*/) : QObject(/*argc, argv*/),
     uiVisible(visible),

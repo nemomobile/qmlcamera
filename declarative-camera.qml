@@ -44,8 +44,8 @@ import QtMultimediaKit 1.1
 Rectangle {
     id : cameraUI
     color: "black"
-    //state: "Initialization"
-    state:  "PhotoCapture"
+    state: "Initialization"
+    property QtObject settings
 
     states: [
         State {
@@ -82,20 +82,12 @@ Rectangle {
             }
         }
     ]
-/*
-    Component.onCompleted: {
-        // Initialize settings from ini file
-        stillControls.flashMode = settings.flashMode
-        stillControls.whiteBalance = settings.whiteBalanceMode
-        stillControls.exposureCompensation = settings.exposureCompensation
-        cameraUI.state = "PhotoCapture"
-    }
 
     // Bind setting controls to settings object
     Binding { target: settings; property: "flashMode"; value: stillControls.flashMode; when: cameraUI.state != "Initialization" }
     Binding { target: settings; property: "whiteBalanceMode"; value: stillControls.whiteBalance; when: cameraUI.state != "Initialization" }
     Binding { target: settings; property: "exposureCompensation"; value: stillControls.exposureCompensation; when: cameraUI.state != "Initialization" }
-*/
+
     PhotoPreview {
         id : photoPreview
         anchors.fill : parent
@@ -189,5 +181,12 @@ Rectangle {
         anchors.fill: parent
         camera: camera
         onPreviewSelected: cameraUI.state = "PhotoPreview"
+    }
+
+    onSettingsChanged : {
+        // Initialize settings from ini file
+        stillControls.flashMode = settings.flashMode
+        stillControls.whiteBalance = settings.whiteBalanceMode
+        stillControls.exposureCompensation = settings.exposureCompensation
     }
 }
