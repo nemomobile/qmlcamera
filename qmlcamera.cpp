@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setOrganizationName("Nokia");
     QCoreApplication::setOrganizationDomain("nokia.com");
-    QCoreApplication::setApplicationName("meego-de-camera");
+    QCoreApplication::setApplicationName("meego-handset-camera");
 
     GpioKeysListener qpiokeyslistener(uiVisible);
 
