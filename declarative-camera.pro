@@ -14,7 +14,7 @@ SOURCES += qmlcamera.cpp \
     qmlcamerasettings.cpp \
     gpiokeyslistener.cpp
 
-TARGET = meego-de-camera
+TARGET = meego-handset-camera
 target.path=/usr/bin
 
 RESOURCES += declarative-camera.qrc
