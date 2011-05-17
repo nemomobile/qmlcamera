@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setOrganizationName("Nokia");
     QCoreApplication::setOrganizationDomain("nokia.com");
-    QCoreApplication::setApplicationName("meego-de-camera");
+    QCoreApplication::setApplicationName("meego-handset-camera");
     QmlCameraSettings settings;
 
     const QString mainQmlApp = QLatin1String("qrc:/declarative-camera.qml");
