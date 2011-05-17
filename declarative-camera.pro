@@ -12,7 +12,7 @@ HEADERS += \
 SOURCES += qmlcamera.cpp \
     qmlcamerasettings.cpp
 
-TARGET = meego-de-camera
+TARGET = meego-handset-camera
 target.path=/usr/bin
 
 RESOURCES += declarative-camera.qrc
