@@ -45,6 +45,7 @@
 #include <QDeclarativeContext>
 #include <QDebug>
 #include <QLocalSocket>
+#include <policy/resource-set.h>
 
 #if !defined(QT_NO_OPENGL)
 #include <QtOpenGL/QGLWidget>
@@ -101,6 +102,7 @@ int main(int argc, char *argv[])
     }
 
     QApplication application(argc, argv);
+    application.setQuitOnLastWindowClosed(false);
 
     QCoreApplication::setOrganizationName("Nokia");
     QCoreApplication::setOrganizationDomain("nokia.com");
@@ -108,7 +110,15 @@ int main(int argc, char *argv[])
 
     GpioKeysListener qpiokeyslistener(uiVisible);
 
-    application.setQuitOnLastWindowClosed(false);
+    ResourcePolicy::ResourceSet* volumeKeyResource = new ResourcePolicy::ResourceSet("camera", &application);
+    volumeKeyResource->setAlwaysReply();
+    // No need to connect resourcesGranted() or lostResources() signals for now.
+    // Camera UI will be started even if ScaleButtonResource resource is not granted.
+
+    ResourcePolicy::ScaleButtonResource *volumeKeys = new ResourcePolicy::ScaleButtonResource;
+    volumeKeyResource->addResourceObject(volumeKeys);
+
+    volumeKeyResource->acquire();
 
     /*
     QmlCameraSettings settings;
@@ -133,6 +143,9 @@ int main(int argc, char *argv[])
     view.show();
 #endif
 */
+
+    volumeKeyResource->release();
+
     return application.exec();
 }
 
