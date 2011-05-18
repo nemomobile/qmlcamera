@@ -44,6 +44,7 @@
 #include <QtDeclarative/QDeclarativeEngine>
 #include <QDeclarativeContext>
 #include <QDebug>
+#include <policy/resource-set.h>
 
 #if !defined(QT_NO_OPENGL)
 #include <QtOpenGL/QGLWidget>
@@ -74,7 +75,18 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("Nokia");
     QCoreApplication::setOrganizationDomain("nokia.com");
     QCoreApplication::setApplicationName("meego-handset-camera");
+
     QmlCameraSettings settings;
+
+    ResourcePolicy::ResourceSet* volumeKeyResource = new ResourcePolicy::ResourceSet("camera", &application);
+    volumeKeyResource->setAlwaysReply();
+    // No need to connect resourcesGranted() or lostResources() signals for now.
+    // Camera UI will be started even if ScaleButtonResource resource is not granted.
+
+    ResourcePolicy::ScaleButtonResource *volumeKeys = new ResourcePolicy::ScaleButtonResource;
+    volumeKeyResource->addResourceObject(volumeKeys);
+
+    volumeKeyResource->acquire();
 
     const QString mainQmlApp = QLatin1String("qrc:/declarative-camera.qml");
     QDeclarativeView view;
@@ -95,6 +107,9 @@ int main(int argc, char *argv[])
     view.setGeometry(QRect(100, 100, 800, 480));
     view.show();
 #endif
+
+    volumeKeyResource->release();
+
     return application.exec();
 }
 

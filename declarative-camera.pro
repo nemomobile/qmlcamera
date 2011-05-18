@@ -1,10 +1,13 @@
 TEMPLATE=app
 
-CONFIG+=meego
+CONFIG+=link_pkgconfig
+
+PKGCONFIG += libresourceqt1
+
 
 DEFINES+=Q_WS_MEEGO
 
-QT += declarative network opengl
+QT += core declarative opengl
 
 HEADERS += \
     qmlcamerasettings.h
