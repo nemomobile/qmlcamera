@@ -158,7 +158,7 @@ Rectangle {
             if (event.key == Qt.Key_ZoomIn || event.key == Qt.Key_F7  ) {
                 // Zoom in
                 event.accepted = true;
-                zoomOutAnimation.stop();
+                zoomInAnimation.stop();
             } else if (event.key == Qt.Key_ZoomOut || event.key == Qt.Key_F8) {
 			    // Zoom out
 			    event.accepted = true;
