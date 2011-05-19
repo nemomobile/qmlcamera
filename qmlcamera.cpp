@@ -60,17 +60,16 @@
 
 int main(int argc, char *argv[])
 {
-   QLocalSocket *socket = new QLocalSocket();
-   socket->connectToServer(SERVER_NAME);
-   if (socket->state())
-   {
-       socket->close();
-       return 0;
-   }
-   socket->close();
-
-
-
+    // Check wheter the app is already running
+    // If that is the case just pop it to foreground
+    QLocalSocket *socket = new QLocalSocket();
+    socket->connectToServer(SERVER_NAME);
+    if (socket->state())
+    {
+        socket->close();
+        return 0;
+    }
+    socket->close();
 
 
 #if defined (Q_WS_X11) || defined (Q_WS_MAC) || defined (Q_OS_SYMBIAN)
@@ -108,6 +107,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("meego-handset-camera");
 
     GpioKeysListener qpiokeyslistener(uiVisible);
+
+    QObject::connect(&qpiokeyslistener, SIGNAL(quit()), qApp, SLOT(quit()));
 
     return application.exec();
 }

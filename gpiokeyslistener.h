@@ -49,6 +49,11 @@ public:
     GpioKeysListener(bool visible);
     ~GpioKeysListener();
 
+
+signals:
+
+    void quit();
+
 private slots:
     void didReceiveKeyEventFromFile(int);
     void hideUI();
@@ -59,7 +64,7 @@ private:
     void openHandles();
     void cleanSocket();
     bool createCamera();
-    void showUI(bool show, bool forced = false);
+    void showUI(bool show);
 
 
     bool uiVisible;
@@ -68,8 +73,7 @@ private:
     QLocalServer *server;
     QVector<QLocalSocket*> connections;
 
-    QDeclarativeView *view;
-    QGraphicsObject *viewobject;
+    QDeclarativeView *m_view;
     QmlCameraSettings m_settings;
 
     ResourcePolicy::ResourceSet* m_volumeKeyResource;
