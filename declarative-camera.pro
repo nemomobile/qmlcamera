@@ -25,4 +25,7 @@ RESOURCES += declarative-camera.qrc
 app_icon.files = meegocamera.desktop
 app_icon.path = /usr/share/applications
 
-INSTALLS += target app_icon
+config_file.files = meego-handset-camera.conf
+config_file.path = /etc/xdg/Nokia
+
+INSTALLS += target app_icon config_file
