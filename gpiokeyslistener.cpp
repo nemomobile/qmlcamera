@@ -72,13 +72,17 @@ GpioKeysListener::GpioKeysListener(bool visible): QObject(), // int argc, char**
         gpioNotifier = 0;
     }
 
-    createCamera();
-    // forced UI visible or hide set
-    showUI(uiVisible,true);
+    if(uiVisible)
+    {
+        createCamera();
+        // forced UI visible or hide set
+        showUI(uiVisible,true);
+    }
 }
 
 GpioKeysListener::~GpioKeysListener()
 {
+    std::cout << ">~GpioKeysListener()" <<   std::endl;
     server->close();
     delete server, server = 0;
     closelog();
@@ -88,6 +92,7 @@ GpioKeysListener::~GpioKeysListener()
         close(gpioFile), gpioFile = -1;
         delete gpioNotifier, gpioNotifier = 0;
     }
+     std::cout << "<~GpioKeysListener()" <<   std::endl;
 }
 
 
@@ -123,7 +128,7 @@ bool GpioKeysListener::createCamera()
 /* Called when we get an input event from a file descriptor. */
 void GpioKeysListener::didReceiveKeyEventFromFile(int fd)
 {
-    //std::cout << ">didReceiveKeyEventFromFile" <<   std::endl;
+    std::cout << ">didReceiveKeyEventFromFile" <<   std::endl;
     for (;;) {
         struct input_event ev;
         memset(&ev, 0, sizeof(ev));
@@ -137,28 +142,32 @@ void GpioKeysListener::didReceiveKeyEventFromFile(int fd)
             HandleGpioKeyEvent(ev);
         }
     }
-    //std::cout << "<didReceiveKeyEventFromFile" <<   std::endl;
+    std::cout << "<didReceiveKeyEventFromFile" <<   std::endl;
 }
 
 void GpioKeysListener::HandleGpioKeyEvent(struct input_event &ev)
 {
+     std::cout << ">HandleGpioKeyEvent()" <<   std::endl;
     if (ev.code == 528) {
-        if ( ev.value == 1 )
-            {
-            //std::cout << "Half Press Pressed" <<  ev.code  << " ev.value" <<  ev.value << std::endl;
-            QApplication::postEvent(view,
-                    new QKeyEvent(QEvent::KeyPress,
-                    Qt::Key_CameraFocus,
-                    Qt::NoModifier));
-            }
-        if ( ev.value == 0 )
-            {
-            //std::cout << "Half Press released" <<  ev.code  << " ev.value" <<  ev.value << std::endl;
-            QApplication::postEvent(view,
-                    new QKeyEvent(QEvent::KeyRelease,
-                    Qt::Key_CameraFocus,
-                    Qt::NoModifier));
-            }
+        if ( uiVisible) {
+            if ( ev.value == 1 )
+                {
+                //std::cout << "Half Press Pressed" <<  ev.code  << " ev.value" <<  ev.value << std::endl;
+                QApplication::postEvent(view,
+                        new QKeyEvent(QEvent::KeyPress,
+                        Qt::Key_CameraFocus,
+                        Qt::NoModifier));
+                }
+            if ( ev.value == 0 )
+                {
+                //std::cout << "Half Press released" <<  ev.code  << " ev.value" <<  ev.value << std::endl;
+                QApplication::postEvent(view,
+                        new QKeyEvent(QEvent::KeyRelease,
+                        Qt::Key_CameraFocus,
+                        Qt::NoModifier));
+                }
+        }
+
     }
     else if ((ev.code == 212 && ev.value == 1) || (ev.code == 9 && ev.value == 0) )
     {
@@ -172,7 +181,8 @@ void GpioKeysListener::HandleGpioKeyEvent(struct input_event &ev)
         //std::cout << "Cover close " << ev.code  << " ev.value" <<  ev.value << std::endl;
     }
 
-    //std::cout << "<HandleGpioKeyEvent" <<   std::endl;
+
+    std::cout << "<HandleGpioKeyEvent" <<   std::endl;
 }
 
 
@@ -183,10 +193,15 @@ void GpioKeysListener::hideUI()
 
 void GpioKeysListener::showUI(bool show, bool forced)
 {
-    //std::cout << ">showUI " << show  << std::endl;
+    std::cout << ">showUI " << show  << std::endl;
     if ((show && !uiVisible) || (show && forced )  )
         {
-        //std::cout << "show" << std::endl;
+        if(!uiVisible || (show && forced ))
+        {
+            std::cout << "show 2" << std::endl;
+            createCamera();
+        }
+        std::cout << "show" << std::endl;
         QGraphicsObject *viewobject2 = view->rootObject();
         view->showFullScreen();
         viewobject2->setVisible(true);
@@ -194,13 +209,22 @@ void GpioKeysListener::showUI(bool show, bool forced)
         }
     else if ((!show && uiVisible )|| (!show && forced ) )
         {
-        //std::cout << "hide" << std::endl;
-        QGraphicsObject *viewobject2 = view->rootObject();
+        if(uiVisible)
+        {
+            std::cout << "hide" << std::endl;
+            view->close();
+            view->deleteLater();
+            view = 0;
+        }
+
+        std::cout << "hide" << std::endl;
+/*        QGraphicsObject *viewobject2 = view->rootObject();
         viewobject2->setVisible(false);
         view->hide();
+        */
         uiVisible = false;
         }
-    //std::cout << "<showUI " << std::endl;
+    std::cout << "<showUI " << std::endl;
 }
 
 void GpioKeysListener::newConnection()
@@ -227,7 +251,7 @@ void GpioKeysListener::disconnected()
 
 void GpioKeysListener::cleanSocket()
 {
-    //std::cout << "cleanSocket()" << std::endl;
+    std::cout << "cleanSocket()" << std::endl;
     QFile serverSocket(SERVER_NAME);
     if (serverSocket.exists()) {
         std::cout << "serverSocket.exists()" << std::endl;

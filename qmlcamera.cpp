@@ -108,6 +108,8 @@ int main(int argc, char *argv[])
 
     GpioKeysListener qpiokeyslistener(uiVisible);
 
+    application.setQuitOnLastWindowClosed(false);
+
     /*
     QmlCameraSettings settings;
 
