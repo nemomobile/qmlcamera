@@ -27,7 +27,6 @@
 #define GpioKeysListener_H
 
 
-//#include <QCoreApplication>
 #include <QObject>
 #include <QLocalServer>
 #include <QSocketNotifier>
@@ -36,7 +35,10 @@
 #include <linux/input.h>
 #include <stdint.h>
 #include <QtDeclarative/QDeclarativeView>
+#include <policy/resource-set.h>
+
 #include "qmlcamerasettings.h"
+
 #define SERVER_NAME "/tmp/meegocamera"
 
 class GpioKeysListener : public QObject
@@ -68,9 +70,9 @@ private:
 
     QDeclarativeView *view;
     QGraphicsObject *viewobject;
-    QmlCameraSettings settings;
+    QmlCameraSettings m_settings;
 
-
+    ResourcePolicy::ResourceSet* m_volumeKeyResource;
 };
 
 #endif // GpioKeysListener_H

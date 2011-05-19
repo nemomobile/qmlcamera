@@ -45,7 +45,6 @@ Rectangle {
     id : cameraUI
     color: "black"
     state: "Initialization"
-    property QtObject settings
 
     states: [
         State {
@@ -54,7 +53,7 @@ Rectangle {
                 script: {
                     camera.visible = true
                     camera.focus = false
-                    stillControls.visible = false
+                    stillControls.visible = true
                     photoPreview.visible = false
                 }
             }
@@ -82,6 +81,14 @@ Rectangle {
             }
         }
     ]
+
+    Component.onCompleted: {
+        // Initialize settings from ini file
+        stillControls.flashMode = settings.flashMode
+        stillControls.whiteBalance = settings.whiteBalanceMode
+        stillControls.exposureCompensation = settings.exposureCompensation
+        cameraUI.state = "PhotoCapture"
+    }
 
     // Bind setting controls to settings object
     Binding { target: settings; property: "flashMode"; value: stillControls.flashMode; when: cameraUI.state != "Initialization" }
@@ -181,12 +188,5 @@ Rectangle {
         anchors.fill: parent
         camera: camera
         onPreviewSelected: cameraUI.state = "PhotoPreview"
-    }
-
-    onSettingsChanged : {
-        // Initialize settings from ini file
-        stillControls.flashMode = settings.flashMode
-        stillControls.whiteBalance = settings.whiteBalanceMode
-        stillControls.exposureCompensation = settings.exposureCompensation
     }
 }

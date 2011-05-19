@@ -7,7 +7,7 @@ PKGCONFIG += libresourceqt1
 
 DEFINES+=Q_WS_MEEGO
 
-QT += core declarative opengl
+QT += core declarative network opengl
 
 HEADERS += \
     qmlcamerasettings.h \

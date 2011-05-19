@@ -1,5 +1,4 @@
 #include "gpiokeyslistener.h"
-#include "qmlcamerasettings.h"
 
 #include <fcntl.h>
 #include <syslog.h>
@@ -37,15 +36,8 @@
 #define SW_KEYPAD_SLIDE 0x0a
 #endif
 
-/*
- * lea  --  helper for address + offset calculations
- */
-//static inline void *lea(void *base, int offs)
-//{
-//    return ((char *)base) + offs;
-//}
 
-GpioKeysListener::GpioKeysListener(bool visible): QObject(), // int argc, char**argv*/) : QObject(/*argc, argv*/),
+GpioKeysListener::GpioKeysListener(bool visible): QObject(),
     uiVisible(visible),
     gpioFile(-1),
     gpioNotifier(0),
@@ -72,6 +64,14 @@ GpioKeysListener::GpioKeysListener(bool visible): QObject(), // int argc, char**
         gpioNotifier = 0;
     }
 
+    m_volumeKeyResource = new ResourcePolicy::ResourceSet("camera", this);
+    m_volumeKeyResource->setAlwaysReply();
+    // No need to connect resourcesGranted() or lostResources() signals for now.
+    // Camera UI will be started even if ScaleButtonResource resource is not granted.
+
+    ResourcePolicy::ScaleButtonResource *volumeKeys = new ResourcePolicy::ScaleButtonResource;
+    m_volumeKeyResource->addResourceObject(volumeKeys);
+
     if(uiVisible)
     {
         createCamera();
@@ -83,6 +83,7 @@ GpioKeysListener::GpioKeysListener(bool visible): QObject(), // int argc, char**
 GpioKeysListener::~GpioKeysListener()
 {
     std::cout << ">~GpioKeysListener()" <<   std::endl;
+    m_volumeKeyResource->release();
     server->close();
     delete server, server = 0;
     closelog();
@@ -98,14 +99,14 @@ GpioKeysListener::~GpioKeysListener()
 
 bool GpioKeysListener::createCamera()
 {
-//    const QString mainQmlApp = QLatin1String("qrc:/declarative-camera.qml");
-    const QString mainQmlApp = QLatin1String("qrc:/cameraloader.qml");
+    const QString mainQmlApp = QLatin1String("qrc:/declarative-camera.qml");
+    //const QString mainQmlApp = QLatin1String("qrc:/cameraloader.qml");
 
     view = new QDeclarativeView;
 #if !defined(QT_NO_OPENGL) && !defined(Q_WS_MAEMO_5) && !defined(Q_WS_S60)
     view->setViewport(new QGLWidget);
 #endif
-    view->rootContext()->setContextProperty("settings", &settings);
+    view->rootContext()->setContextProperty("settings", &m_settings);
     view->setSource(QUrl(mainQmlApp));
     view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
     // Qt.quit() called in embedded .qml by default only emits
@@ -113,11 +114,9 @@ bool GpioKeysListener::createCamera()
     QObject::connect(view->engine(), SIGNAL(quit()), this, SLOT(hideUI()));
     // QObject::connect(view.engine(), SIGNAL(()), qApp, SLOT(quit()));
 #if defined(Q_OS_SYMBIAN) || defined(Q_WS_MAEMO_5) || defined(Q_WS_MAEMO_6) || defined(Q_WS_MEEGO)
-    view->setGeometry(QRect(0, 0, 800, 480));//application.desktop()->screenGeometry());
-    //view->showFullScreen();
+    view->setGeometry(QRect(0, 0, 800, 480));
 #else
     view->setGeometry(QRect(100, 100, 800, 480));
-    //view->show();
 #endif
 
     return true;
@@ -196,6 +195,7 @@ void GpioKeysListener::showUI(bool show, bool forced)
     std::cout << ">showUI " << show  << std::endl;
     if ((show && !uiVisible) || (show && forced )  )
         {
+        m_volumeKeyResource->acquire();
         if(!uiVisible || (show && forced ))
         {
             std::cout << "show 2" << std::endl;
@@ -209,6 +209,7 @@ void GpioKeysListener::showUI(bool show, bool forced)
         }
     else if ((!show && uiVisible )|| (!show && forced ) )
         {
+        m_volumeKeyResource->release();
         if(uiVisible)
         {
             std::cout << "hide" << std::endl;
@@ -218,10 +219,6 @@ void GpioKeysListener::showUI(bool show, bool forced)
         }
 
         std::cout << "hide" << std::endl;
-/*        QGraphicsObject *viewobject2 = view->rootObject();
-        viewobject2->setVisible(false);
-        view->hide();
-        */
         uiVisible = false;
         }
     std::cout << "<showUI " << std::endl;

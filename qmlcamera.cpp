@@ -45,7 +45,6 @@
 #include <QDeclarativeContext>
 #include <QDebug>
 #include <QLocalSocket>
-#include <policy/resource-set.h>
 
 #if !defined(QT_NO_OPENGL)
 #include <QtOpenGL/QGLWidget>
@@ -109,42 +108,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("meego-handset-camera");
 
     GpioKeysListener qpiokeyslistener(uiVisible);
-
-    ResourcePolicy::ResourceSet* volumeKeyResource = new ResourcePolicy::ResourceSet("camera", &application);
-    volumeKeyResource->setAlwaysReply();
-    // No need to connect resourcesGranted() or lostResources() signals for now.
-    // Camera UI will be started even if ScaleButtonResource resource is not granted.
-
-    ResourcePolicy::ScaleButtonResource *volumeKeys = new ResourcePolicy::ScaleButtonResource;
-    volumeKeyResource->addResourceObject(volumeKeys);
-
-    volumeKeyResource->acquire();
-
-    /*
-    QmlCameraSettings settings;
-
-    const QString mainQmlApp = QLatin1String("qrc:/declarative-camera.qml");
-    QDeclarativeView view;
-#if !defined(QT_NO_OPENGL) && !defined(Q_WS_MAEMO_5) && !defined(Q_WS_S60)
-    view.setViewport(new QGLWidget);
-#endif
-    view.rootContext()->setContextProperty("settings", &settings);
-    view.setSource(QUrl(mainQmlApp));
-    view.setResizeMode(QDeclarativeView::SizeRootObjectToView);
-    // Qt.quit() called in embedded .qml by default only emits
-    // quit() signal, so do this (optionally use Qt.exit()).
-    QObject::connect(view.engine(), SIGNAL(quit()), qApp, SLOT(quit()));
-
-#if defined(Q_OS_SYMBIAN) || defined(Q_WS_MAEMO_5) || defined(Q_WS_MAEMO_6) || defined(Q_WS_MEEGO)
-    view.setGeometry(application.desktop()->screenGeometry());
-    view.showFullScreen();
-#else
-    view.setGeometry(QRect(100, 100, 800, 480));
-    view.show();
-#endif
-*/
-
-    volumeKeyResource->release();
 
     return application.exec();
 }

@@ -22,8 +22,5 @@
         <file>images/camera_white_balance_sunny.png</file>
         <file>images/toolbutton.png</file>
         <file>images/toolbutton.sci</file>
-        <file>cameraloader.qml</file>
-        <file>gpiokeyslistener.cpp</file>
-        <file>gpiokeyslistener.h</file>
     </qresource>
 </RCC>
