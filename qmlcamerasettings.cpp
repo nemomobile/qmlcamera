@@ -55,5 +55,5 @@ void QmlCameraSettings::setExposureCompensation(QVariant exposure)
 void QmlCameraSettings::setCaptureResolution(QVariant reso)
 {
     setValue(CAPTURE_RESOLUTION_KEY, reso);
-    emit exposureCompensationChanged(reso);
+    emit captureResolutionChanged(reso);
 }
