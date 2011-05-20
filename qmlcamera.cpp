@@ -44,16 +44,24 @@
 #include <QtDeclarative/QDeclarativeEngine>
 #include <QDeclarativeContext>
 #include <QDebug>
-#include <policy/resource-set.h>
+#include <QLocalSocket>
 
-#if !defined(QT_NO_OPENGL)
-#include <QtOpenGL/QGLWidget>
-#endif
+#include "gpiokeyslistener.h"
 
-#include "qmlcamerasettings.h"
 
 int main(int argc, char *argv[])
 {
+    // Check wheter the app is already running
+    // If that is the case just pop it to foreground
+    QLocalSocket *socket = new QLocalSocket();
+    socket->connectToServer(SERVER_NAME);
+    if (socket->state())
+    {
+        socket->close();
+        return 0;
+    }
+    socket->close();
+
 
 #if defined (Q_WS_X11) || defined (Q_WS_MAC) || defined (Q_OS_SYMBIAN)
     //### default to using raster graphics backend for now
@@ -70,45 +78,28 @@ int main(int argc, char *argv[])
         QApplication::setGraphicsSystem("raster");
 #endif
 
+
+
+    bool uiVisible = true;
+
+    for (int i = 0; i < argc; ++i) {
+        QString arg = argv[i];
+        if (arg == "-background") {
+            uiVisible = false;
+            break;
+        }
+    }
+
     QApplication application(argc, argv);
+    application.setQuitOnLastWindowClosed(false);
 
     QCoreApplication::setOrganizationName("Nokia");
     QCoreApplication::setOrganizationDomain("nokia.com");
     QCoreApplication::setApplicationName("meego-handset-camera");
 
-    QmlCameraSettings settings;
+    GpioKeysListener qpiokeyslistener(uiVisible);
 
-    ResourcePolicy::ResourceSet* volumeKeyResource = new ResourcePolicy::ResourceSet("camera", &application);
-    volumeKeyResource->setAlwaysReply();
-    // No need to connect resourcesGranted() or lostResources() signals for now.
-    // Camera UI will be started even if ScaleButtonResource resource is not granted.
-
-    ResourcePolicy::ScaleButtonResource *volumeKeys = new ResourcePolicy::ScaleButtonResource;
-    volumeKeyResource->addResourceObject(volumeKeys);
-
-    volumeKeyResource->acquire();
-
-    const QString mainQmlApp = QLatin1String("qrc:/declarative-camera.qml");
-    QDeclarativeView view;
-#if !defined(QT_NO_OPENGL) && !defined(Q_WS_MAEMO_5) && !defined(Q_WS_S60)
-    view.setViewport(new QGLWidget);
-#endif
-    view.rootContext()->setContextProperty("settings", &settings);
-    view.setSource(QUrl(mainQmlApp));
-    view.setResizeMode(QDeclarativeView::SizeRootObjectToView);
-    // Qt.quit() called in embedded .qml by default only emits
-    // quit() signal, so do this (optionally use Qt.exit()).
-    QObject::connect(view.engine(), SIGNAL(quit()), qApp, SLOT(quit()));
-
-#if defined(Q_OS_SYMBIAN) || defined(Q_WS_MAEMO_5) || defined(Q_WS_MAEMO_6) || defined(Q_WS_MEEGO)
-    view.setGeometry(application.desktop()->screenGeometry());
-    view.showFullScreen();
-#else
-    view.setGeometry(QRect(100, 100, 800, 480));
-    view.show();
-#endif
-
-    volumeKeyResource->release();
+    QObject::connect(&qpiokeyslistener, SIGNAL(quit()), qApp, SLOT(quit()));
 
     return application.exec();
 }

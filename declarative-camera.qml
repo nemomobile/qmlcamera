@@ -53,7 +53,7 @@ Rectangle {
                 script: {
                     camera.visible = true
                     camera.focus = false
-                    stillControls.visible = false
+                    stillControls.visible = true
                     photoPreview.visible = false
                 }
             }
@@ -118,6 +118,8 @@ Rectangle {
         width: parent.width
         height: parent.height
         focus: visible //to receive focus and capture key events
+
+        captureResolution : settings.captureResolution
         
         previewResolution : camera.width + "x" + camera.height
         viewfinderResolution : camera.width + "x" + camera.height
