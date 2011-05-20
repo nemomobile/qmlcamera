@@ -11,11 +11,11 @@ QT += core declarative network opengl
 
 HEADERS += \
     qmlcamerasettings.h \
-    gpiokeyslistener.h
+    meegocamera.h
 
-SOURCES += qmlcamera.cpp \
+SOURCES += main.cpp \
     qmlcamerasettings.cpp \
-    gpiokeyslistener.cpp
+    meegocamera.cpp
 
 TARGET = meego-handset-camera
 target.path=/usr/bin

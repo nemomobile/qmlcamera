@@ -1,4 +1,4 @@
-#include "gpiokeyslistener.h"
+#include "meegocamera.h"
 
 #include <fcntl.h>
 #include <syslog.h>
@@ -23,7 +23,7 @@
 #define GPIO_KEYS "/dev/input/gpio-keys"
 
 
-GpioKeysListener::GpioKeysListener(bool visible): QObject(),
+MeegoCamera::MeegoCamera(bool visible): QObject(),
     uiVisible(visible),
     gpioFile(-1),
     gpioNotifier(0),
@@ -63,7 +63,7 @@ GpioKeysListener::GpioKeysListener(bool visible): QObject(),
         showUI(true);
 }
 
-GpioKeysListener::~GpioKeysListener()
+MeegoCamera::~MeegoCamera()
 {
     //std::cout << ">~GpioKeysListener()" <<   std::endl;
     m_volumeKeyResource->release();
@@ -89,7 +89,7 @@ GpioKeysListener::~GpioKeysListener()
 }
 
 
-bool GpioKeysListener::createCamera()
+bool MeegoCamera::createCamera()
 {
     if(!m_view) {
         const QString mainQmlApp = QLatin1String("qrc:/declarative-camera.qml");
@@ -114,7 +114,7 @@ bool GpioKeysListener::createCamera()
 
 
 /* Called when we get an input event from a file descriptor. */
-void GpioKeysListener::didReceiveKeyEventFromFile(int fd)
+void MeegoCamera::didReceiveKeyEventFromFile(int fd)
 {
     //std::cout << ">didReceiveKeyEventFromFile" <<   std::endl;
     for (;;) {
@@ -131,7 +131,7 @@ void GpioKeysListener::didReceiveKeyEventFromFile(int fd)
     //std::cout << "<didReceiveKeyEventFromFile" <<   std::endl;
 }
 
-void GpioKeysListener::HandleGpioKeyEvent(struct input_event &ev)
+void MeegoCamera::HandleGpioKeyEvent(struct input_event &ev)
 {
     //std::cout << ">HandleGpioKeyEvent()" <<   std::endl;
     if (ev.code == 528) {
@@ -165,12 +165,12 @@ void GpioKeysListener::HandleGpioKeyEvent(struct input_event &ev)
 }
 
 
-void GpioKeysListener::hideUI()
+void MeegoCamera::hideUI()
 {
     showUI(false);
 }
 
-void GpioKeysListener::showUI(bool show)
+void MeegoCamera::showUI(bool show)
 {
     //std::cout << ">showUI " << show  << std::endl;
     if (show) {
@@ -194,7 +194,7 @@ void GpioKeysListener::showUI(bool show)
     //std::cout << "<showUI " << std::endl;
 }
 
-void GpioKeysListener::newConnection()
+void MeegoCamera::newConnection()
 {
     while (server->hasPendingConnections()) {
         showUI(true);
@@ -204,7 +204,7 @@ void GpioKeysListener::newConnection()
     }
 }
 
-void GpioKeysListener::disconnected()
+void MeegoCamera::disconnected()
 {
     QLocalSocket *socket = qobject_cast<QLocalSocket*>(sender());
     for (QVector<QLocalSocket*>::iterator it = connections.begin(); it != connections.end(); it++) {
@@ -216,7 +216,7 @@ void GpioKeysListener::disconnected()
     socket->deleteLater();
 }
 
-void GpioKeysListener::cleanSocket()
+void MeegoCamera::cleanSocket()
 {
     std::cout << "cleanSocket()" << std::endl;
     QFile serverSocket(SERVER_NAME);

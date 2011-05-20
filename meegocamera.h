@@ -16,13 +16,13 @@
 
 #define SERVER_NAME "/tmp/meegocamera"
 
-class GpioKeysListener : public QObject
+class MeegoCamera : public QObject
 {
     Q_OBJECT
 
 public:
-    GpioKeysListener(bool visible);
-    ~GpioKeysListener();
+    MeegoCamera(bool visible);
+    ~MeegoCamera();
 
 
 signals:

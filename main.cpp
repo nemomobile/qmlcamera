@@ -46,7 +46,7 @@
 #include <QDebug>
 #include <QLocalSocket>
 
-#include "gpiokeyslistener.h"
+#include "meegocamera.h"
 
 
 int main(int argc, char *argv[])
@@ -97,9 +97,9 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("nokia.com");
     QCoreApplication::setApplicationName("meego-handset-camera");
 
-    GpioKeysListener qpiokeyslistener(uiVisible);
+    MeegoCamera camera(uiVisible);
 
-    QObject::connect(&qpiokeyslistener, SIGNAL(quit()), qApp, SLOT(quit()));
+    QObject::connect(&camera, SIGNAL(quit()), qApp, SLOT(quit()));
 
     return application.exec();
 }
