@@ -40,13 +40,14 @@ private:
     void cleanSocket();
     bool createCamera();
     void showUI(bool show);
+    bool getSwitchState(int fd, int key);
 
-
-    bool uiVisible;
-    int gpioFile;
-    QSocketNotifier *gpioNotifier;
-    QLocalServer *server;
-    QVector<QLocalSocket*> connections;
+    bool m_uiVisible;
+    bool m_coverState;
+    int m_gpioFile;
+    QSocketNotifier *m_gpioNotifier;
+    QLocalServer *m_server;
+    QVector<QLocalSocket*> m_connections;
 
     QDeclarativeView *m_view;
     QmlCameraSettings m_settings;
