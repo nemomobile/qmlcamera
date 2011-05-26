@@ -105,7 +105,7 @@ bool MeegoCamera::createCamera()
         QObject::connect(m_view->engine(), SIGNAL(quit()), this, SIGNAL(quit()));
         // QObject::connect(view.engine(), SIGNAL(()), qApp, SLOT(quit()));
         m_view->setGeometry(QRect(0, 0, 800, 480));
-
+        m_view->installEventFilter(this);
     }
 
     return true;
@@ -154,10 +154,13 @@ void MeegoCamera::HandleGpioKeyEvent(struct input_event &ev)
 
     } else if ((ev.code == 212 && ev.value == 1) || (ev.code == 9 && ev.value == 0) ) {
         // Check if UI is running and show it if not
-        showUI(true);
+        //showUI(true);
+        if(ev.code == 9 && ev.value == 0)
+            m_view->rootObject()->setProperty("lensCoverStatus",true);
         //std::cout << "Full Press or cover opened" << ev.code  << " ev.value" <<  ev.value<< std::endl;
     } else if (ev.code == 9 && ev.value == 1) {
-        showUI(false);
+        //showUI(false);
+        m_view->rootObject()->setProperty("lensCoverStatus",false);
         //std::cout << "Cover close " << ev.code  << " ev.value" <<  ev.value << std::endl;
     }
 
@@ -214,6 +217,14 @@ void MeegoCamera::disconnected()
         }
     }
     socket->deleteLater();
+}
+
+bool MeegoCamera::eventFilter(QObject* watched, QEvent* event)
+{
+    if( watched == m_view && event->type() == QEvent::ActivationChange && m_view->rootObject())
+        m_view->rootObject()->setProperty("active",m_view->isActiveWindow());
+
+    return false;
 }
 
 void MeegoCamera::cleanSocket()

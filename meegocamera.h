@@ -29,11 +29,19 @@ signals:
 
     void quit();
 
+
+public:
+
+    // Event filter is used to track activation/deactivation
+    // of events of QDeclarativeView window
+    bool eventFilter(QObject* watched, QEvent* event);
+
 private slots:
     void didReceiveKeyEventFromFile(int);
     void hideUI();
     void newConnection();
     void disconnected();
+
 private:
     void HandleGpioKeyEvent(struct input_event &ev);
     void openHandles();
