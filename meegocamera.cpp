@@ -24,31 +24,31 @@
 
 
 MeegoCamera::MeegoCamera(bool visible): QObject(),
-    uiVisible(visible),
-    gpioFile(-1),
-    gpioNotifier(0),
-    server(0),
-    connections(0),
+    m_uiVisible(visible),
+    m_gpioFile(-1),
+    m_gpioNotifier(0),
+    m_server(0),
+    m_connections(0),
     m_view(0)
 {
-    server = new QLocalServer(this);
-    if (!connect(server, SIGNAL(newConnection()), this, SLOT(newConnection()))) {
+    m_server = new QLocalServer(this);
+    if (!connect(m_server, SIGNAL(newConnection()), this, SLOT(newConnection()))) {
         //std::cout << "Failed to connect the newConnection signal  ()" << std::endl;
     }
     cleanSocket();
 
-    if (!server->listen(SERVER_NAME)) {
+    if (!m_server->listen(SERVER_NAME)) {
          //std::cout << "Failed to listen incoming connections on()" << std::endl;
     }
 
 
-    gpioFile = open(GPIO_KEYS, O_RDONLY | O_NONBLOCK);
-    if (gpioFile != -1) {
-        gpioNotifier = new QSocketNotifier(gpioFile, QSocketNotifier::Read);
-        connect(gpioNotifier, SIGNAL(activated(int)), this, SLOT(didReceiveKeyEventFromFile(int)));
+    m_gpioFile = open(GPIO_KEYS, O_RDONLY | O_NONBLOCK);
+    if (m_gpioFile != -1) {
+        m_gpioNotifier = new QSocketNotifier(m_gpioFile, QSocketNotifier::Read);
+        connect(m_gpioNotifier, SIGNAL(activated(int)), this, SLOT(didReceiveKeyEventFromFile(int)));
     } else {
-        //std::cout << "could not open gpioFile " << std::endl;
-        gpioNotifier = 0;
+        //std::cout << "could not open m_gpioFile " << std::endl;
+        m_gpioNotifier = 0;
     }
 
     m_volumeKeyResource = new ResourcePolicy::ResourceSet("camera", this);
@@ -59,7 +59,9 @@ MeegoCamera::MeegoCamera(bool visible): QObject(),
     ResourcePolicy::ScaleButtonResource *volumeKeys = new ResourcePolicy::ScaleButtonResource;
     m_volumeKeyResource->addResourceObject(volumeKeys);
 
-    if(uiVisible)
+    m_coverState = !getSwitchState(m_gpioFile, 9);
+
+    if (m_uiVisible)
         showUI(true);
 }
 
@@ -68,37 +70,42 @@ MeegoCamera::~MeegoCamera()
     //std::cout << ">~GpioKeysListener()" <<   std::endl;
     m_volumeKeyResource->release();
 
-    if(m_view)
+    if (m_view)
         delete m_view;
 
     m_view = 0;
 
-    server->close();
-    delete server;
-    server = 0;
+    m_server->close();
+    delete m_server;
+    m_server = 0;
     closelog();
 
 
-    if (gpioFile != -1) {
-        close(gpioFile);
-        gpioFile = -1;
-        delete gpioNotifier;
-        gpioNotifier = 0;
+    if (m_gpioFile != -1) {
+        close(m_gpioFile);
+        m_gpioFile = -1;
+        delete m_gpioNotifier;
+        m_gpioNotifier = 0;
     }
     //std::cout << "<~GpioKeysListener()" <<   std::endl;
 }
 
 
-bool MeegoCamera::createCamera()
+void MeegoCamera::createCamera()
 {
-    if(!m_view) {
+    if (!m_view) {
         const QString mainQmlApp = QLatin1String("qrc:/declarative-camera.qml");
+
+        qDebug() << Q_FUNC_INFO << "cover state = " << m_coverState;
 
         m_view = new QDeclarativeView;
         m_view->setAttribute(Qt::WA_DeleteOnClose, true);
         m_view->setViewport(new QGLWidget);
         m_view->rootContext()->setContextProperty("settings", &m_settings);
+        //m_view->rootContext()->setContextProperty("lensCoverStatus", m_coverState);
         m_view->setSource(QUrl(mainQmlApp));
+        m_view->rootObject()->setProperty("lensCoverStatus",m_coverState);
+        m_view->rootObject()->setProperty("lensCoverStatus",m_coverState);
         m_view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
         // Qt.quit() called in embedded .qml by default only emits
         // quit() signal, so do this (optionally use Qt.exit()).
@@ -107,8 +114,6 @@ bool MeegoCamera::createCamera()
         m_view->setGeometry(QRect(0, 0, 800, 480));
         m_view->installEventFilter(this);
     }
-
-    return true;
 }
 
 
@@ -135,7 +140,7 @@ void MeegoCamera::HandleGpioKeyEvent(struct input_event &ev)
 {
     //std::cout << ">HandleGpioKeyEvent()" <<   std::endl;
     if (ev.code == 528) {
-        if ( uiVisible) {
+        if ( m_uiVisible) {
             if ( ev.value == 1 ) {
                 //std::cout << "Half Press Pressed" <<  ev.code  << " ev.value" <<  ev.value << std::endl;
                 QApplication::postEvent(m_view,
@@ -151,14 +156,19 @@ void MeegoCamera::HandleGpioKeyEvent(struct input_event &ev)
                         Qt::NoModifier));
             }
         }
-
-    } else if ((ev.code == 212 && ev.value == 1) || (ev.code == 9 && ev.value == 0) ) {
+    } else if (ev.code == 212 && ev.value == 1 ) {
+        // Check if UI is running and show it if not
+        showUI(true);
+        //std::cout << "Full Press" << ev.code  << " ev.value" <<  ev.value<< std::endl;
+    } else if ((ev.code == 9 && ev.value == 0) ) {
+        m_coverState = true;
         // Check if UI is running and show it if not
         //showUI(true);
         if(ev.code == 9 && ev.value == 0)
             m_view->rootObject()->setProperty("lensCoverStatus",true);
         //std::cout << "Full Press or cover opened" << ev.code  << " ev.value" <<  ev.value<< std::endl;
     } else if (ev.code == 9 && ev.value == 1) {
+        m_coverState = false;
         //showUI(false);
         m_view->rootObject()->setProperty("lensCoverStatus",false);
         //std::cout << "Cover close " << ev.code  << " ev.value" <<  ev.value << std::endl;
@@ -182,7 +192,8 @@ void MeegoCamera::showUI(bool show)
 
         m_view->showFullScreen();
         m_view->rootObject()->setVisible(true);
-        uiVisible = true;
+        m_view->rootObject()->setProperty("active",true);
+        m_uiVisible = true;
     } else {
         m_volumeKeyResource->release();
         if(m_view) {
@@ -191,7 +202,7 @@ void MeegoCamera::showUI(bool show)
             m_view = 0;
         }
 
-        uiVisible = false;
+        m_uiVisible = false;
         //std::cout << "hide" << std::endl;
     }
     //std::cout << "<showUI " << std::endl;
@@ -199,20 +210,20 @@ void MeegoCamera::showUI(bool show)
 
 void MeegoCamera::newConnection()
 {
-    while (server->hasPendingConnections()) {
+    while (m_server->hasPendingConnections()) {
         showUI(true);
-        QLocalSocket *socket = server->nextPendingConnection();
+        QLocalSocket *socket = m_server->nextPendingConnection();
         connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
-        connections.push_back(socket);
+        m_connections.push_back(socket);
     }
 }
 
 void MeegoCamera::disconnected()
 {
     QLocalSocket *socket = qobject_cast<QLocalSocket*>(sender());
-    for (QVector<QLocalSocket*>::iterator it = connections.begin(); it != connections.end(); it++) {
+    for (QVector<QLocalSocket*>::iterator it = m_connections.begin(); it != m_connections.end(); it++) {
         if (*it == socket) {
-            connections.erase(it);
+            m_connections.erase(it);
             break;
         }
     }
@@ -242,3 +253,12 @@ void MeegoCamera::cleanSocket()
         }
     }
 }
+
+bool MeegoCamera::getSwitchState(int fd, int key)
+{
+    uint8_t keys[SW_MAX/8 + 1];
+    memset(keys, 0, sizeof *keys);
+    ioctl(fd, EVIOCGSW(sizeof(keys)), keys);
+    return (keys[key/8] & (1 << (key % 8)));
+}
+

@@ -49,7 +49,7 @@ Rectangle {
     // This defines "active" state. For example when state is
     // "PhotoCapture" active state is also "PhotoCapture" but
     // when state changes to "Standby" active state remains as
-    // "PhotoCapture". When the app is revoked from "Standby"
+    // "PhotoCapture". When the app returns from "Standby"
     // state the active state will be activated.
     property string activeState: "PhotoCapture"
 
@@ -63,15 +63,13 @@ Rectangle {
     // or closed the app is not active
     // true = active
     // false = not active
-    property bool active : true
+    property bool active : false
 
     states: [
         State {
             name: "Standby"
             StateChangeScript {
                 script: {
-                    //camera.visible = false
-                    //camera.focus = false
                     stillControls.visible = false
                     photoPreview.visible = false
                 }
@@ -81,8 +79,6 @@ Rectangle {
             name: "PhotoCapture"
             StateChangeScript {
                 script: {
-                    //camera.visible = true
-                    //camera.focus = true
                     stillControls.visible = true
                     photoPreview.visible = false
                 }
@@ -92,8 +88,6 @@ Rectangle {
             name: "PhotoPreview"
             StateChangeScript {
                 script: {
-                    //camera.visible = false
-                    //camera.focus = false
                     stillControls.visible = false
                     photoPreview.visible = true
                     photoPreview.focus = true
@@ -127,7 +121,7 @@ Rectangle {
             // Go to standby mode
             activeState = state
             state = "Standby"
-            console.log("meego-handset-camera: got to standby")
+            console.log("meego-handset-camera: go to standby")
         } else if(!standbyStatus && state == "Standby" && active) {
             // Wake up from standby mode
             console.log("meego-handset-camera: wake up from standby to state " + activeState)
@@ -143,17 +137,28 @@ Rectangle {
 
         console.log("meego-handset-camera: Component.onCompleted: lens cover = " + lensCoverStatus )
 
-        toggleStandby(false)
+        //toggleStandby(false)
     }
 
     onStateChanged: {
         console.log("meego-handset-camera: onStateChanged = " + state)
         if(state == "Standby") {
-            console.log("meego-handset-camera: onStateChanged: stop camera")
+            console.log("meego-handset-camera: onStateChanged: Standby: stop camera")
             camera.stop()
-        } else if(state == "PhotoCapture" && lensCoverStatus)
-            console.log("meego-handset-camera: onStateChanged: start camera")
-            camera.start()
+        } else if(state == "PhotoCapture" && lensCoverStatus) {
+            console.log("meego-handset-camera: onStateChanged: PhotoCapture")
+
+            if(lensCoverStatus) {
+                console.log("meego-handset-camera: onStateChanged: PhotoCapture: start camera")
+                camera.cameraState = "ActiveState"
+                camera.start()
+                camera.focus = true
+            } /*else {
+                console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover closed -> stop camera")
+                camera.stop()
+                camera.focus = false
+            }*/
+        }
     }
 
     onLensCoverStatusChanged: {
@@ -164,7 +169,9 @@ Rectangle {
             camera.stop()
         } else if(state == "PhotoCapture") {
             console.log("meego-handset-camera: onLensCoverStatusChanged: start camera")
+            camera.cameraState = "ActiveState"
             camera.start()
+            camera.focus = true
         }
     }
 
@@ -199,7 +206,7 @@ Rectangle {
         width: parent.width
         height: parent.height
         visible: parent.state == "PhotoCapture" && lensCoverStatus
-        focus: visible
+        cameraState: "LoadedState"
 
         captureResolution : settings.captureResolution
         
@@ -275,7 +282,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        width: parent.width - stillControls.settingsPaneWidth
+        width: stillControls.visible ? parent.width : parent.width - stillControls.settingsPaneWidth
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         text: parent.state == "Standby" ? "Standby" : "Lens cover closed"

@@ -46,15 +46,20 @@ private:
     void HandleGpioKeyEvent(struct input_event &ev);
     void openHandles();
     void cleanSocket();
-    bool createCamera();
+    void createCamera();
     void showUI(bool show);
 
+    // Returns state of given switch, for example lens cover
+    // true = switch is on
+    // false = switch is off
+    bool getSwitchState(int fd, int key);
 
-    bool uiVisible;
-    int gpioFile;
-    QSocketNotifier *gpioNotifier;
-    QLocalServer *server;
-    QVector<QLocalSocket*> connections;
+    bool m_uiVisible;
+    bool m_coverState;
+    int m_gpioFile;
+    QSocketNotifier *m_gpioNotifier;
+    QLocalServer *m_server;
+    QVector<QLocalSocket*> m_connections;
 
     QDeclarativeView *m_view;
     QmlCameraSettings m_settings;
