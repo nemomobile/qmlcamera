@@ -38,7 +38,6 @@ public:
 
 private slots:
     void didReceiveKeyEventFromFile(int);
-    void hideUI();
     void newConnection();
     void disconnected();
 

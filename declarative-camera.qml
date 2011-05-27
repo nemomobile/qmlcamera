@@ -134,30 +134,30 @@ Rectangle {
         stillControls.flashMode = settings.flashMode
         stillControls.whiteBalance = settings.whiteBalanceMode
         stillControls.exposureCompensation = settings.exposureCompensation
-
-        console.log("meego-handset-camera: Component.onCompleted: lens cover = " + lensCoverStatus )
-
-        //toggleStandby(false)
     }
 
     onStateChanged: {
         console.log("meego-handset-camera: onStateChanged = " + state)
         if(state == "Standby") {
-            console.log("meego-handset-camera: onStateChanged: Standby: stop camera")
-            camera.stop()
-        } else if(state == "PhotoCapture" && lensCoverStatus) {
+            console.log("meego-handset-camera: onStateChanged: Standby: camera to UnloadedState")
+            camera.cameraState = "UnloadedState"
+        } else if(state == "PhotoCapture") {
             console.log("meego-handset-camera: onStateChanged: PhotoCapture")
 
             if(lensCoverStatus) {
-                console.log("meego-handset-camera: onStateChanged: PhotoCapture: start camera")
+                console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover open ->  camera to ActiveState")
                 camera.cameraState = "ActiveState"
-                camera.start()
                 camera.focus = true
-            } /*else {
-                console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover closed -> stop camera")
-                camera.stop()
+            } else {
+                if( camera.cameraState = "ActiveState" ) {
+                    console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover closed -> camera to LoadedState")
+                    camera.cameraState = "LoadedState"
+                } else {
+                    console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover closed")
+                }
+
                 camera.focus = false
-            }*/
+            }
         }
     }
 
@@ -166,11 +166,11 @@ Rectangle {
 
         if(!lensCoverStatus) {
             console.log("meego-handset-camera: onLensCoverStatusChanged: stop camera")
-            camera.stop()
+            if( camera.cameraState = "ActiveState" )
+                camera.cameraState = "LoadedState"
         } else if(state == "PhotoCapture") {
             console.log("meego-handset-camera: onLensCoverStatusChanged: start camera")
             camera.cameraState = "ActiveState"
-            camera.start()
             camera.focus = true
         }
     }
@@ -187,17 +187,6 @@ Rectangle {
     Binding { target: settings; property: "whiteBalanceMode"; value: stillControls.whiteBalance; when: cameraUI.state != "Standby" }
     Binding { target: settings; property: "exposureCompensation"; value: stillControls.exposureCompensation; when: cameraUI.state != "Standby" }
 
-//    Text {
-//        id: standbyText
-//        visible: parent.state == "Standby"
-//        color: "white"
-//        font.pixelSize: 36
-//        anchors.fill: parent
-//        horizontalAlignment: Text.AlignHCenter
-//        verticalAlignment: Text.AlignVCenter
-//        text: "Standby"
-//    }
-
     Camera {
         id: camera
         objectName: "camera"
@@ -205,7 +194,7 @@ Rectangle {
         y: 0
         width: parent.width
         height: parent.height
-        visible: parent.state == "PhotoCapture" && lensCoverStatus
+        visible: cameraState == "ActiveState"
         cameraState: "LoadedState"
 
         captureResolution : settings.captureResolution
@@ -223,6 +212,8 @@ Rectangle {
             stillControls.previewAvailable = true
             changeState("PhotoPreview")
         }
+
+        onCameraStateChanged : console.log("meego-handset-camera: CAMERA STATE = " + cameraState)
         
         Keys.onPressed : {
             if (event.key == Qt.Key_Camera || event.key == Qt.Key_WebCam ) {
@@ -282,7 +273,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        width: stillControls.visible ? parent.width : parent.width - stillControls.settingsPaneWidth
+        width: stillControls.visible ? parent.width - stillControls.settingsPaneWidth : parent.width
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         text: parent.state == "Standby" ? "Standby" : "Lens cover closed"
@@ -293,6 +284,7 @@ Rectangle {
         anchors.fill: parent
         camera: camera
         onPreviewSelected: changeState("PhotoPreview")
+        //onPreviewSelected: mainWindow.showMinimized()
     }
 
     PhotoPreview {
@@ -309,12 +301,4 @@ Rectangle {
             }
         }
     }
-
-    Text {
-        id: log
-        color: "red"
-        font.pixelSize: 20
-        text: camera.cameraState
-    }
-
 }
