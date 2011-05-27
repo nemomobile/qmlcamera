@@ -10,6 +10,7 @@ class QmlCameraSettings : public QSettings
     Q_PROPERTY(QVariant flashMode READ flashMode WRITE setFlashMode NOTIFY flashModeChanged)
     Q_PROPERTY(QVariant exposureCompensation READ exposureCompensation WRITE setExposureCompensation NOTIFY exposureCompensationChanged)
     Q_PROPERTY(QVariant captureResolution READ captureResolution WRITE setCaptureResolution NOTIFY captureResolutionChanged)
+    Q_PROPERTY(QVariant viewfinderResolution READ viewfinderResolution WRITE setViewfinderResolution NOTIFY viewfinderResolutionChanged)
 public:
     explicit QmlCameraSettings(QObject *parent = 0);
 
@@ -17,6 +18,7 @@ public:
     QVariant flashMode() const;
     QVariant exposureCompensation() const;
     QVariant captureResolution() const;
+    QVariant viewfinderResolution() const;
 
 signals:
 
@@ -24,14 +26,14 @@ signals:
     void flashModeChanged(QVariant);
     void exposureCompensationChanged(QVariant);
     void captureResolutionChanged(QVariant);
-
+    void viewfinderResolutionChanged(QVariant);
 public slots:
 
     void setWhiteBalanceMode(QVariant);
     void setFlashMode(QVariant);
     void setExposureCompensation(QVariant);
     void setCaptureResolution(QVariant);
-
+    void setViewfinderResolution(QVariant);
 };
 
 #endif // QMLCAMERASETTINGS_H
