@@ -147,16 +147,17 @@ Rectangle {
             if(lensCoverStatus) {
                 console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover open ->  camera to ActiveState")
                 camera.cameraState = "ActiveState"
-                camera.focus = true
+                //camera.focus = true
             } else {
                 if( camera.cameraState = "ActiveState" ) {
                     console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover closed -> camera to LoadedState")
-                    camera.cameraState = "LoadedState"
+                    //camera.cameraState = "LoadedState"
+                    camera.cameraState = "UnloadedState"
                 } else {
                     console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover closed")
                 }
 
-                camera.focus = false
+                //camera.focus = false
             }
         }
     }
@@ -166,12 +167,13 @@ Rectangle {
 
         if(!lensCoverStatus) {
             console.log("meego-handset-camera: onLensCoverStatusChanged: stop camera")
-            if( camera.cameraState = "ActiveState" )
-                camera.cameraState = "LoadedState"
+            //if( camera.cameraState = "ActiveState" )
+                //camera.cameraState = "UnloadedState"
+            //    camera.cameraState = "LoadedState"
         } else if(state == "PhotoCapture") {
             console.log("meego-handset-camera: onLensCoverStatusChanged: start camera")
-            camera.cameraState = "ActiveState"
-            camera.focus = true
+            //camera.cameraState = "ActiveState"
+            //camera.focus = true
         }
     }
 
@@ -194,13 +196,17 @@ Rectangle {
         y: 0
         width: parent.width
         height: parent.height
-        visible: cameraState == "ActiveState"
-        cameraState: "LoadedState"
+        focus: visible
+        //visible: cameraState == "ActiveState"
+        //visible: true
+        //cameraState: "LoadedState"
+        cameraState: "UnloadedState"
 
         captureResolution : settings.captureResolution
         
         previewResolution : camera.width + "x" + camera.height
-        viewfinderResolution : camera.width + "x" + camera.height
+        //viewfinderResolution : camera.width + "x" + camera.height
+        viewfinderResolution: "800x448"
 
 
         flashMode: stillControls.flashMode
@@ -213,7 +219,10 @@ Rectangle {
             changeState("PhotoPreview")
         }
 
-        onCameraStateChanged : console.log("meego-handset-camera: CAMERA STATE = " + cameraState)
+        onCameraStateChanged : {
+            console.log("meego-handset-camera: CAMERA STATE = " + cameraState)
+            visible = true
+        }
         
         Keys.onPressed : {
             if (event.key == Qt.Key_Camera || event.key == Qt.Key_WebCam ) {
@@ -283,8 +292,8 @@ Rectangle {
         id: stillControls
         anchors.fill: parent
         camera: camera
-        onPreviewSelected: changeState("PhotoPreview")
-        //onPreviewSelected: mainWindow.showMinimized()
+        //onPreviewSelected: changeState("PhotoPreview")
+        onPreviewSelected: mainWindow.showMinimized()
     }
 
     PhotoPreview {

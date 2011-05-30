@@ -87,7 +87,7 @@ MeegoCamera::~MeegoCamera()
 void MeegoCamera::createCamera()
 {
     if (!m_view) {
-        //qDebug() << Q_FUNC_INFO << "new UI created";
+        qDebug() << Q_FUNC_INFO << "new UI created";
 
         const QString mainQmlApp = QLatin1String("qrc:/declarative-camera.qml");
 
@@ -100,7 +100,7 @@ void MeegoCamera::createCamera()
 
         m_view->setSource(QUrl(mainQmlApp));
 
-        //m_view->rootObject()->setProperty("lensCoverStatus",m_coverState);
+        m_view->rootObject()->setProperty("lensCoverStatus",m_coverState);
 
         m_view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
         // Qt.quit() called in embedded .qml by default only emits
@@ -110,7 +110,7 @@ void MeegoCamera::createCamera()
         m_view->setGeometry(QRect(0, 0, 800, 480));
         m_view->installEventFilter(this);
 
-        //qDebug() << Q_FUNC_INFO << "new UI ready";
+        qDebug() << Q_FUNC_INFO << "new UI ready";
     }
 }
 
@@ -153,27 +153,31 @@ void MeegoCamera::HandleGpioKeyEvent(struct input_event &ev)
         // Check if UI is running and show it if not
         showUI(true);
     } else if ((ev.code == 9 && ev.value == 0) ) { // Lens cover opened
+        qDebug() << Q_FUNC_INFO << "lens cover opened ->";
         // Check if UI is running and show it if not
         m_coverState = true;
         showUI(true);
         //m_view->rootObject()->setProperty("lensCoverStatus",true);
+        qDebug() << Q_FUNC_INFO << "lens cover opened <-";
     } else if (ev.code == 9 && ev.value == 1) { // Lens cover closed
+        qDebug() << Q_FUNC_INFO << "lens cover closed ->";
         m_coverState = false;
-        m_view->rootObject()->setProperty("lensCoverStatus",false);
+        //m_view->rootObject()->setProperty("lensCoverStatus",false);
         showUI(false);
+        qDebug() << Q_FUNC_INFO << "lens cover closed <-";
     }
 }
 
 void MeegoCamera::showUI(bool show)
 {
     if (show) {
-        //qDebug() << Q_FUNC_INFO << "show ->";
+        qDebug() << Q_FUNC_INFO << "show ->";
         m_volumeKeyResource->acquire();
         createCamera();
 
         //qDebug() << Q_FUNC_INFO << "show: camera created";
 
-        m_view->rootObject()->setProperty("lensCoverStatus",m_coverState);
+        //m_view->rootObject()->setProperty("lensCoverStatus",m_coverState);
         m_view->showFullScreen();
 
         //qDebug() << Q_FUNC_INFO << "show: UI shown";
@@ -181,19 +185,36 @@ void MeegoCamera::showUI(bool show)
         m_view->rootObject()->setVisible(true);
         m_view->rootObject()->setProperty("active",true);
         m_uiVisible = true;
-        //qDebug() << Q_FUNC_INFO << "show <-";
+        qDebug() << Q_FUNC_INFO << "show <-";
     } else {
-        //qDebug() << Q_FUNC_INFO << "hide ->";
+        qDebug() << Q_FUNC_INFO << "hide ->";
         m_volumeKeyResource->release();
         if(m_view) {
-            //qDebug() << Q_FUNC_INFO << "hide";
-            m_view->close();
-            //qDebug() << Q_FUNC_INFO << "hide: view closed";
+            qDebug() << Q_FUNC_INFO << "hide";
+
+            // LOL part starts here
+
+            // We want no events from m_view after calling
+            // close(), that is why m_view is set to NULL
+            // before calling close().
+            // Events are ignore because viewfinder must be
+            // running when the view is closed.
+            // Otherwise the viewfinder (xvoverlay) goes to
+            // inconsistent state when the view is created again.
+            QDeclarativeView* view = m_view;
             m_view = 0;
+
+            // Make sure that the view finder is running before
+            // closing the view.
+            view->rootObject()->setProperty("lensCoverStatus",true);
+            view->rootObject()->setProperty("active",true);
+
+            view->close();
+            qDebug() << Q_FUNC_INFO << "hide: view closed";
         }
 
         m_uiVisible = false;
-        //qDebug() << Q_FUNC_INFO << "hide <-";
+        qDebug() << Q_FUNC_INFO << "hide <-";
     }
 }
 
@@ -222,7 +243,7 @@ void MeegoCamera::disconnected()
 bool MeegoCamera::eventFilter(QObject* watched, QEvent* event)
 {
     if( watched == m_view && event->type() == QEvent::ActivationChange && m_view->rootObject()) {
-        //qDebug() << Q_FUNC_INFO << "window active status changed as " << m_view->isActiveWindow();
+        qDebug() << Q_FUNC_INFO << "window active status changed as " << m_view->isActiveWindow();
 
         m_view->rootObject()->setProperty("active",m_view->isActiveWindow());
 
