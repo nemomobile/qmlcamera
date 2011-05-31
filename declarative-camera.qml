@@ -206,7 +206,7 @@ Rectangle {
         captureResolution : settings.captureResolution
         
         previewResolution : camera.width + "x" + camera.height
-        viewfinderResolution : camera.width + "x" + camera.height
+        viewfinderResolution: settings.viewfinderResolution
 
         flashMode: stillControls.flashMode
         whiteBalanceMode: stillControls.whiteBalance
