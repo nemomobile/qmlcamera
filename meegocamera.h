@@ -40,6 +40,7 @@ private slots:
     void didReceiveKeyEventFromFile(int);
     void newConnection();
     void disconnected();
+    void viewDestroyed(QObject*);
 
 private:
     void HandleGpioKeyEvent(struct input_event &ev);

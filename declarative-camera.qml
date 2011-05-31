@@ -72,6 +72,7 @@ Rectangle {
                 script: {
                     stillControls.visible = false
                     photoPreview.visible = false
+                    camera.visible = false
                 }
             }
         },
@@ -91,6 +92,7 @@ Rectangle {
                     stillControls.visible = false
                     photoPreview.visible = true
                     photoPreview.focus = true
+                    camera.visible = false
                 }
             }
         }
@@ -147,7 +149,8 @@ Rectangle {
             if(lensCoverStatus) {
                 console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover open ->  camera to ActiveState")
                 camera.cameraState = "ActiveState"
-                //camera.focus = true
+                camera.visible = true
+                camera.focus = true
             } else {
                 if( camera.cameraState = "ActiveState" ) {
                     console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover closed -> camera to LoadedState")
@@ -157,7 +160,8 @@ Rectangle {
                     console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover closed")
                 }
 
-                //camera.focus = false
+                camera.focus = false
+                camera.visible = false
             }
         }
     }
@@ -167,13 +171,13 @@ Rectangle {
 
         if(!lensCoverStatus) {
             console.log("meego-handset-camera: onLensCoverStatusChanged: stop camera")
-            //if( camera.cameraState = "ActiveState" )
-                //camera.cameraState = "UnloadedState"
+            if( camera.cameraState = "ActiveState" )
+                camera.cameraState = "UnloadedState"
             //    camera.cameraState = "LoadedState"
         } else if(state == "PhotoCapture") {
             console.log("meego-handset-camera: onLensCoverStatusChanged: start camera")
-            //camera.cameraState = "ActiveState"
-            //camera.focus = true
+            camera.cameraState = "ActiveState"
+            camera.focus = true
         }
     }
 
@@ -196,8 +200,9 @@ Rectangle {
         y: 0
         width: parent.width
         height: parent.height
-        focus: visible
-        //visible: cameraState == "ActiveState"
+        focus: false
+        visible: false
+        //visible: cameraState == "ActiveState" && state == "PhotoCapture"
         //visible: true
         //cameraState: "LoadedState"
         cameraState: "UnloadedState"
