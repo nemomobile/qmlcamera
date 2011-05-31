@@ -309,4 +309,21 @@ Rectangle {
             }
         }
     }
+
+    ImageButton {
+        id: homeButton
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.topMargin: 6
+        anchors.leftMargin: 6
+
+        width: 48
+        height: 48
+
+        source: "images/icon-m-framework-home.svg"
+
+        onClicked: mainWindow.showMinimized()
+    }
+
 }
