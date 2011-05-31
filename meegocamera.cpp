@@ -3,7 +3,6 @@
 #include <fcntl.h>
 #include <syslog.h>
 #include <errno.h>
-//#include <iostream>
 
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -31,11 +30,11 @@ MeegoCamera::MeegoCamera(bool visible): QObject(),
     m_connections(0),
     m_view(0)
 {
-    qDebug() << Q_FUNC_INFO;
+    //qDebug() << Q_FUNC_INFO;
 
     m_server = new QLocalServer(this);
 
-    qDebug() << Q_FUNC_INFO << "socket server created";
+    //qDebug() << Q_FUNC_INFO << "socket server created";
 
     connect(m_server, SIGNAL(newConnection()), this, SLOT(newConnection()));
 
@@ -43,7 +42,7 @@ MeegoCamera::MeegoCamera(bool visible): QObject(),
 
     m_server->listen(SERVER_NAME);
 
-    qDebug() << Q_FUNC_INFO << "connected to socket server";
+    //qDebug() << Q_FUNC_INFO << "connected to socket server";
 
     m_gpioFile = open(GPIO_KEYS, O_RDONLY | O_NONBLOCK);
     if (m_gpioFile != -1) {
@@ -53,7 +52,7 @@ MeegoCamera::MeegoCamera(bool visible): QObject(),
         m_gpioNotifier = 0;
     }
 
-    qDebug() << Q_FUNC_INFO << "gpio device opened";
+    //qDebug() << Q_FUNC_INFO << "gpio device opened";
 
     m_volumeKeyResource = new ResourcePolicy::ResourceSet("camera", this);
     m_volumeKeyResource->setAlwaysReply();
@@ -63,28 +62,28 @@ MeegoCamera::MeegoCamera(bool visible): QObject(),
     ResourcePolicy::ScaleButtonResource *volumeKeys = new ResourcePolicy::ScaleButtonResource;
     m_volumeKeyResource->addResourceObject(volumeKeys);
 
-    qDebug() << Q_FUNC_INFO << "volume key resource connected";
+    //qDebug() << Q_FUNC_INFO << "volume key resource connected";
 
     m_coverState = !getSwitchState(m_gpioFile, 9);
 
     if (m_uiVisible)
         showUI(true);
 
-    qDebug() << Q_FUNC_INFO << "UI created  ";
+    //qDebug() << Q_FUNC_INFO << "UI created  ";
 }
 
 MeegoCamera::~MeegoCamera()
 {
-    qDebug() << Q_FUNC_INFO;
+    //qDebug() << Q_FUNC_INFO;
 
     m_volumeKeyResource->release();
 
-    qDebug() << Q_FUNC_INFO << "volume ker resource released";
+    //qDebug() << Q_FUNC_INFO << "volume ker resource released";
 
     if (m_view)
         delete m_view;
 
-    qDebug() << Q_FUNC_INFO << "view deleted";
+    //qDebug() << Q_FUNC_INFO << "view deleted";
 
     m_view = 0;
 
@@ -92,11 +91,11 @@ MeegoCamera::~MeegoCamera()
     delete m_server;
     m_server = 0;
 
-    qDebug() << Q_FUNC_INFO << "socket server closed";
+    //qDebug() << Q_FUNC_INFO << "socket server closed";
 
     closelog();
 
-    qDebug() << Q_FUNC_INFO << "system log closed";
+    //qDebug() << Q_FUNC_INFO << "system log closed";
 
     if (m_gpioFile != -1) {
         close(m_gpioFile);
@@ -105,14 +104,14 @@ MeegoCamera::~MeegoCamera()
         m_gpioNotifier = 0;
     }
 
-    qDebug() << Q_FUNC_INFO << "destructor complete";
+    //qDebug() << Q_FUNC_INFO << "destructor complete";
 }
 
 
 void MeegoCamera::createCamera()
 {
     if (!m_view) {
-        qDebug() << Q_FUNC_INFO << "new UI created";
+        //qDebug() << Q_FUNC_INFO << "new UI created";
 
         const QString mainQmlApp = QLatin1String("qrc:/declarative-camera.qml");
 
@@ -138,7 +137,7 @@ void MeegoCamera::createCamera()
         m_view->setGeometry(QRect(0, 0, 800, 480));
         m_view->installEventFilter(this);
 
-        qDebug() << Q_FUNC_INFO << "new UI ready";
+        //qDebug() << Q_FUNC_INFO << "new UI ready";
     }
 }
 
@@ -181,31 +180,29 @@ void MeegoCamera::HandleGpioKeyEvent(struct input_event &ev)
         // Check if UI is running and show it if not
         showUI(true);
     } else if ((ev.code == 9 && ev.value == 0) ) { // Lens cover opened
-        qDebug() << Q_FUNC_INFO << "lens cover opened ->";
+        //qDebug() << Q_FUNC_INFO << "lens cover opened ->";
         // Check if UI is running and show it if not
         m_coverState = true;
         showUI(true);
         m_view->rootObject()->setProperty("lensCoverStatus",true);
-        qDebug() << Q_FUNC_INFO << "lens cover opened <-";
+        //qDebug() << Q_FUNC_INFO << "lens cover opened <-";
     } else if (ev.code == 9 && ev.value == 1) { // Lens cover closed
-        qDebug() << Q_FUNC_INFO << "lens cover closed ->";
+        //qDebug() << Q_FUNC_INFO << "lens cover closed ->";
         m_coverState = false;
-        //m_view->rootObject()->setProperty("lensCoverStatus",false);
         showUI(false);
-        qDebug() << Q_FUNC_INFO << "lens cover closed <-";
+        //qDebug() << Q_FUNC_INFO << "lens cover closed <-";
     }
 }
 
 void MeegoCamera::showUI(bool show)
 {
     if (show) {
-        qDebug() << Q_FUNC_INFO << "show ->";
+        //qDebug() << Q_FUNC_INFO << "show ->";
         m_volumeKeyResource->acquire();
         createCamera();
 
         //qDebug() << Q_FUNC_INFO << "show: camera created";
 
-        //m_view->rootObject()->setProperty("lensCoverStatus",m_coverState);
         m_view->showFullScreen();
 
         //qDebug() << Q_FUNC_INFO << "show: UI shown";
@@ -213,12 +210,12 @@ void MeegoCamera::showUI(bool show)
         m_view->rootObject()->setVisible(true);
         m_view->rootObject()->setProperty("active",true);
         m_uiVisible = true;
-        qDebug() << Q_FUNC_INFO << "show <-";
+        //qDebug() << Q_FUNC_INFO << "show <-";
     } else {
-        qDebug() << Q_FUNC_INFO << "hide ->";
+        //qDebug() << Q_FUNC_INFO << "hide ->";
         m_volumeKeyResource->release();
         if(m_view) {
-            qDebug() << Q_FUNC_INFO << "hide";
+            //qDebug() << Q_FUNC_INFO << "hide";
 
             // LOL part starts here
 
@@ -240,11 +237,11 @@ void MeegoCamera::showUI(bool show)
             view->rootObject()->setProperty("active",true);
 
             view->close();
-            qDebug() << Q_FUNC_INFO << "hide: view closed";
+            //qDebug() << Q_FUNC_INFO << "hide: view closed";
         }
 
         m_uiVisible = false;
-        qDebug() << Q_FUNC_INFO << "hide <-";
+        //qDebug() << Q_FUNC_INFO << "hide <-";
     }
 }
 
@@ -272,7 +269,7 @@ void MeegoCamera::disconnected()
 
 void MeegoCamera::viewDestroyed(QObject* object)
 {
-    qDebug() << Q_FUNC_INFO;
+    //qDebug() << Q_FUNC_INFO;
 
     // Let's emit quit() signal if the destroyed object is
     // view. In case of lens cover close m_view is already
@@ -288,7 +285,7 @@ void MeegoCamera::viewDestroyed(QObject* object)
 bool MeegoCamera::eventFilter(QObject* watched, QEvent* event)
 {
     if( watched == m_view && event->type() == QEvent::ActivationChange && m_view->rootObject()) {
-        qDebug() << Q_FUNC_INFO << "window active status changed as " << m_view->isActiveWindow();
+        //qDebug() << Q_FUNC_INFO << "window active status changed as " << m_view->isActiveWindow();
 
         m_view->rootObject()->setProperty("active",m_view->isActiveWindow());
 

@@ -117,16 +117,16 @@ Rectangle {
     // Toggles "Standby" state on/off
     function toggleStandby(standbyStatus)
     {
-        console.log("meego-handset-camera: toggleStandby = " + standbyStatus)
-        console.log("meego-handset-camera: toggleStandby: state = " + state + "  active = " + active)
+        //console.log("meego-handset-camera: toggleStandby = " + standbyStatus)
+        //console.log("meego-handset-camera: toggleStandby: state = " + state + "  active = " + active)
         if(standbyStatus && state != "Standby") {
             // Go to standby mode
             activeState = state
             state = "Standby"
-            console.log("meego-handset-camera: go to standby")
+            //console.log("meego-handset-camera: go to standby")
         } else if(!standbyStatus && state == "Standby" && active) {
             // Wake up from standby mode
-            console.log("meego-handset-camera: wake up from standby to state " + activeState)
+            //console.log("meego-handset-camera: wake up from standby to state " + activeState)
             state = activeState
         }
     }
@@ -139,25 +139,24 @@ Rectangle {
     }
 
     onStateChanged: {
-        console.log("meego-handset-camera: onStateChanged = " + state)
+        //console.log("meego-handset-camera: onStateChanged = " + state)
         if(state == "Standby") {
-            console.log("meego-handset-camera: onStateChanged: Standby: camera to UnloadedState")
+            //console.log("meego-handset-camera: onStateChanged: Standby: camera to UnloadedState")
             camera.cameraState = "UnloadedState"
         } else if(state == "PhotoCapture") {
-            console.log("meego-handset-camera: onStateChanged: PhotoCapture")
+            //console.log("meego-handset-camera: onStateChanged: PhotoCapture")
 
             if(lensCoverStatus) {
-                console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover open ->  camera to ActiveState")
+                //console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover open ->  camera to ActiveState")
                 camera.cameraState = "ActiveState"
                 camera.visible = true
                 camera.focus = true
             } else {
                 if( camera.cameraState = "ActiveState" ) {
-                    console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover closed -> camera to LoadedState")
-                    //camera.cameraState = "LoadedState"
+                    //console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover closed -> camera to LoadedState")
                     camera.cameraState = "UnloadedState"
                 } else {
-                    console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover closed")
+                    //console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover closed")
                 }
 
                 camera.focus = false
@@ -167,22 +166,22 @@ Rectangle {
     }
 
     onLensCoverStatusChanged: {
-        console.log("meego-handset-camera: onLensCoverStatusChanged = " + lensCoverStatus)
+        //console.log("meego-handset-camera: onLensCoverStatusChanged = " + lensCoverStatus)
 
         if(!lensCoverStatus) {
-            console.log("meego-handset-camera: onLensCoverStatusChanged: stop camera")
+            //console.log("meego-handset-camera: onLensCoverStatusChanged: stop camera")
             if( camera.cameraState = "ActiveState" )
                 camera.cameraState = "UnloadedState"
             //    camera.cameraState = "LoadedState"
         } else if(state == "PhotoCapture") {
-            console.log("meego-handset-camera: onLensCoverStatusChanged: start camera")
+            //console.log("meego-handset-camera: onLensCoverStatusChanged: start camera")
             camera.cameraState = "ActiveState"
             camera.focus = true
         }
     }
 
     onActiveChanged: {
-        console.log("meego-handset-camera ACTIVE = " + active )
+        //console.log("meego-handset-camera ACTIVE = " + active )
 
         toggleStandby(!active)
     }
@@ -202,17 +201,12 @@ Rectangle {
         height: parent.height
         focus: false
         visible: false
-        //visible: cameraState == "ActiveState" && state == "PhotoCapture"
-        //visible: true
-        //cameraState: "LoadedState"
         cameraState: "UnloadedState"
 
         captureResolution : settings.captureResolution
         
         previewResolution : camera.width + "x" + camera.height
-        //viewfinderResolution : camera.width + "x" + camera.height
-        viewfinderResolution: "800x448"
-
+        viewfinderResolution : camera.width + "x" + camera.height
 
         flashMode: stillControls.flashMode
         whiteBalanceMode: stillControls.whiteBalance
@@ -225,7 +219,7 @@ Rectangle {
         }
 
         onCameraStateChanged : {
-            console.log("meego-handset-camera: CAMERA STATE = " + cameraState)
+            //console.log("meego-handset-camera: CAMERA STATE = " + cameraState)
             visible = true
         }
         
@@ -297,8 +291,8 @@ Rectangle {
         id: stillControls
         anchors.fill: parent
         camera: camera
-        //onPreviewSelected: changeState("PhotoPreview")
-        onPreviewSelected: mainWindow.showMinimized()
+        onPreviewSelected: changeState("PhotoPreview")
+        //onPreviewSelected: mainWindow.showMinimized()
     }
 
     PhotoPreview {
