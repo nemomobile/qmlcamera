@@ -14,8 +14,6 @@ Item {
     Image {
         id: image
         anchors.fill: parent
-        opacity: parent
-        //source: "images/icon-m-framework-home.svg"
         fillMode: Image.PreserveAspectFit
         smooth: true
     }
