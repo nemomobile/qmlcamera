@@ -41,9 +41,11 @@
 import Qt 4.7
 import QtMultimediaKit 1.1
 
-Item {
+Rectangle {
     property alias source : preview.source
     signal closed
+
+    color: "black"
 
     Image {
         id: preview

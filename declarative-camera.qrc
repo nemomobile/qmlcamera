@@ -10,6 +10,7 @@
         <file>FocusButton.qml</file>
         <file>PhotoPreview.qml</file>
         <file>ZoomControl.qml</file>
+        <file>ImageButton.qml</file>
         <file>images/camera_auto_mode.png</file>
         <file>images/camera_camera_setting.png</file>
         <file>images/camera_flash_auto.png</file>
@@ -20,6 +21,7 @@
         <file>images/camera_white_balance_flourescent.png</file>
         <file>images/camera_white_balance_incandescent.png</file>
         <file>images/camera_white_balance_sunny.png</file>
+        <file>images/icon-m-framework-home.svg</file>
         <file>images/toolbutton.png</file>
         <file>images/toolbutton.sci</file>
     </qresource>

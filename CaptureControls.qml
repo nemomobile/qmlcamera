@@ -42,15 +42,17 @@ import Qt 4.7
 import QtMultimediaKit 1.1
 
 FocusScope {
+    id : captureControls
+
     property Camera camera
     property bool previewAvailable : false
+    property alias settingsPaneWidth : buttonsColumn.width
 
     property alias whiteBalance : wbModesButton.value
     property alias flashMode : flashModesButton.value
     property alias exposureCompensation : exposureCompensationButton.value
 
     signal previewSelected
-    id : captureControls
 
     Column {
         id: buttonsColumn
@@ -67,6 +69,7 @@ FocusScope {
         CameraButton {
             text: "Capture"
             onClicked: camera.captureImage()
+            visible: camera.cameraState == Camera.ActiveState
         }
 
         CameraPropertyButton {
@@ -218,6 +221,7 @@ FocusScope {
     }
 
     ZoomControl {
+        visible: camera.cameraState == Camera.ActiveState
         x : 0
         y : 0
         width : 100

@@ -7,7 +7,7 @@
 #define FLASH_MODE_KEY "flash-mode"
 #define EXPOSURE_COMPENSATION_KEY "exposure-compensation"
 #define CAPTURE_RESOLUTION_KEY "capture-resolution"
-
+#define VIEWFINDER_RESOLUTION_KEY "viewfinder-resolution"
 
 QmlCameraSettings::QmlCameraSettings(QObject *parent) :
     QSettings(parent)
@@ -33,6 +33,10 @@ QVariant QmlCameraSettings::captureResolution() const
 {
     return value(CAPTURE_RESOLUTION_KEY, QVariant(QSizeF()));
 }
+QVariant QmlCameraSettings::viewfinderResolution() const
+{
+    return value(VIEWFINDER_RESOLUTION_KEY, QVariant(QSizeF()));
+}
 
 void QmlCameraSettings::setWhiteBalanceMode(QVariant wb)
 {
@@ -57,3 +61,10 @@ void QmlCameraSettings::setCaptureResolution(QVariant reso)
     setValue(CAPTURE_RESOLUTION_KEY, reso);
     emit captureResolutionChanged(reso);
 }
+
+void QmlCameraSettings::setViewfinderResolution(QVariant reso)
+{
+    setValue(VIEWFINDER_RESOLUTION_KEY, reso);
+    emit viewfinderResolutionChanged(reso);
+}
+
