@@ -118,6 +118,7 @@ void MeegoCamera::createCamera()
 
         m_view = new QDeclarativeView;
         connect(m_view, SIGNAL(destroyed(QObject*)), SLOT(viewDestroyed(QObject*)));
+
         m_view->setAttribute(Qt::WA_DeleteOnClose, true);
 
         m_view->setViewport(new QGLWidget);
@@ -137,7 +138,6 @@ void MeegoCamera::createCamera()
             QObject::connect(m_view->engine(), SIGNAL(quit()), this, SLOT(hideUI()));
         else
             QObject::connect(m_view->engine(), SIGNAL(quit()), this, SIGNAL(quit()));
-
 
         // QObject::connect(view.engine(), SIGNAL(()), qApp, SLOT(quit()));
         m_view->setGeometry(QRect(0, 0, 800, 480));
@@ -201,6 +201,7 @@ void MeegoCamera::HandleGpioKeyEvent(struct input_event &ev)
 }
 
 
+
 void MeegoCamera::hideUI()
 {
     showUI(false);
@@ -239,6 +240,7 @@ void MeegoCamera::showUI(bool show)
             // Otherwise the viewfinder (xvoverlay) goes to
             // inconsistent state when the view is created again.
             // Setting m_view as NULL also prevents quit() signal
+
             // to be emitted in viewDestroyed() method.
             QDeclarativeView* view = m_view;
             m_view = 0;
@@ -249,8 +251,6 @@ void MeegoCamera::showUI(bool show)
             view->rootObject()->setProperty("active",true);
 
             view->close();
-
-            view->deleteLater();
             //qDebug() << Q_FUNC_INFO << "hide: view closed";
         }
 
@@ -294,6 +294,7 @@ void MeegoCamera::viewDestroyed(QObject* object)
         m_view = 0;
         if ( !m_background )
             emit quit();
+
     }
 }
 
