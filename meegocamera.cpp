@@ -24,6 +24,7 @@
 
 MeegoCamera::MeegoCamera(bool visible): QObject(),
     m_uiVisible(visible),
+    m_background(!visible),
     m_gpioFile(-1),
     m_gpioNotifier(0),
     m_server(0),
@@ -116,10 +117,9 @@ void MeegoCamera::createCamera()
         const QString mainQmlApp = QLatin1String("qrc:/declarative-camera.qml");
 
         m_view = new QDeclarativeView;
-
         connect(m_view, SIGNAL(destroyed(QObject*)), SLOT(viewDestroyed(QObject*)));
-
         m_view->setAttribute(Qt::WA_DeleteOnClose, true);
+
         m_view->setViewport(new QGLWidget);
 
         m_view->rootContext()->setContextProperty("settings", &m_settings);
@@ -132,7 +132,13 @@ void MeegoCamera::createCamera()
         m_view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
         // Qt.quit() called in embedded .qml by default only emits
         // quit() signal, so do this (optionally use Qt.exit()).
-        QObject::connect(m_view->engine(), SIGNAL(quit()), this, SIGNAL(quit()));
+        // If application was started with background flag, then just hide UI.
+        if ( m_background )
+            QObject::connect(m_view->engine(), SIGNAL(quit()), this, SLOT(hideUI()));
+        else
+            QObject::connect(m_view->engine(), SIGNAL(quit()), this, SIGNAL(quit()));
+
+
         // QObject::connect(view.engine(), SIGNAL(()), qApp, SLOT(quit()));
         m_view->setGeometry(QRect(0, 0, 800, 480));
         m_view->installEventFilter(this);
@@ -194,6 +200,12 @@ void MeegoCamera::HandleGpioKeyEvent(struct input_event &ev)
     }
 }
 
+
+void MeegoCamera::hideUI()
+{
+    showUI(false);
+}
+
 void MeegoCamera::showUI(bool show)
 {
     if (show) {
@@ -222,11 +234,11 @@ void MeegoCamera::showUI(bool show)
             // We want no events from m_view after calling
             // close(), that is why m_view is set to NULL
             // before calling close().
-            // Events are ignore because viewfinder must be
+            // Events are ignored because viewfinder must be
             // running when the view is closed.
             // Otherwise the viewfinder (xvoverlay) goes to
             // inconsistent state when the view is created again.
-            // Seting m_view as NULL also prevents quit() singnal
+            // Setting m_view as NULL also prevents quit() signal
             // to be emitted in viewDestroyed() method.
             QDeclarativeView* view = m_view;
             m_view = 0;
@@ -237,6 +249,8 @@ void MeegoCamera::showUI(bool show)
             view->rootObject()->setProperty("active",true);
 
             view->close();
+
+            view->deleteLater();
             //qDebug() << Q_FUNC_INFO << "hide: view closed";
         }
 
@@ -278,7 +292,8 @@ void MeegoCamera::viewDestroyed(QObject* object)
     // when lens cover is closed.
     if(m_view == object) {
         m_view = 0;
-        emit quit();
+        if ( !m_background )
+            emit quit();
     }
 }
 

@@ -37,6 +37,7 @@ public:
     bool eventFilter(QObject* watched, QEvent* event);
 
 private slots:
+    void hideUI();
     void didReceiveKeyEventFromFile(int);
     void newConnection();
     void disconnected();
@@ -56,6 +57,7 @@ private:
 
     bool m_uiVisible;
     bool m_coverState;
+    bool m_background;
     int m_gpioFile;
     QSocketNotifier *m_gpioNotifier;
     QLocalServer *m_server;

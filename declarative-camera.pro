@@ -25,7 +25,12 @@ RESOURCES += declarative-camera.qrc
 app_icon.files = meegocamera.desktop
 app_icon.path = /usr/share/applications
 
+# XDG Autostart
+autostart_entry.files = meegocamera_background.desktop
+autostart_entry.path = /etc/xdg/autostart
+autostart_entry.CONFIG += no_check_exist
+
 config_file.files = meego-handset-camera.conf
 config_file.path = /etc/xdg/Nokia
 
-INSTALLS += target app_icon config_file
+INSTALLS += autostart_entry target app_icon config_file 
