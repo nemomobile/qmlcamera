@@ -68,7 +68,7 @@ MeegoCamera::MeegoCamera(bool visible): QObject(),
     m_coverState = !getSwitchState(m_gpioFile, 9);
 
     if (m_uiVisible)
-        showUI(true);
+        showUI();
 
     //qDebug() << Q_FUNC_INFO << "UI created  ";
 }
@@ -181,12 +181,12 @@ void MeegoCamera::HandleGpioKeyEvent(struct input_event &ev)
         }
     } else if (ev.code == 212 && ev.value == 1 ) { // Camera button pressed
         // Check if UI is running and show it if not
-        showUI(true);
+        showUI();
     } else if ((ev.code == 9 && ev.value == 0) ) { // Lens cover opened
         //qDebug() << Q_FUNC_INFO << "lens cover opened ->";
         // Check if UI is running and show it if not
         m_coverState = true;
-        showUI(true);
+        showUI();
         m_view->rootObject()->setProperty("lensCoverStatus",true);
         //qDebug() << Q_FUNC_INFO << "lens cover opened <-";
     } else if (ev.code == 9 && ev.value == 1) { // Lens cover closed
@@ -217,38 +217,28 @@ void MeegoCamera::hideUI()
     }
 }
 
-void MeegoCamera::showUI(bool show)
+void MeegoCamera::showUI()
 {
-    if (show) {
-        //qDebug() << Q_FUNC_INFO << "show ->";
-        m_volumeKeyResource->acquire();
-        createCamera();
+    //qDebug() << Q_FUNC_INFO << "show ->";
+    m_volumeKeyResource->acquire();
+    createCamera();
 
-        //qDebug() << Q_FUNC_INFO << "show: camera created";
+    //qDebug() << Q_FUNC_INFO << "show: camera created";
 
-        m_view->showFullScreen();
+    m_view->showFullScreen();
 
-        //qDebug() << Q_FUNC_INFO << "show: UI shown";
+    //qDebug() << Q_FUNC_INFO << "show: UI shown";
 
-        m_view->rootObject()->setVisible(true);
-        m_view->rootObject()->setProperty("active",true);
-        m_uiVisible = true;
-        //qDebug() << Q_FUNC_INFO << "show <-";
-    } else {
-        //qDebug() << Q_FUNC_INFO << "hide ->";
-
-        if(m_view)
-            m_view->close();
-
-        m_uiVisible = false;
-        //qDebug() << Q_FUNC_INFO << "hide <-";
-    }
+    m_view->rootObject()->setVisible(true);
+    m_view->rootObject()->setProperty("active",true);
+    m_uiVisible = true;
+    //qDebug() << Q_FUNC_INFO << "show <-";
 }
 
 void MeegoCamera::newConnection()
 {
     while (m_server->hasPendingConnections()) {
-        showUI(true);
+        showUI();
         QLocalSocket *socket = m_server->nextPendingConnection();
         connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
         m_connections.push_back(socket);

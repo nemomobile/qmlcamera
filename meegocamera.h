@@ -48,7 +48,7 @@ private:
     void openHandles();
     void cleanSocket();
     void createCamera();
-    void showUI(bool show);
+    void showUI();
 
     // Returns state of given switch, for example lens cover
     // true = switch is on
