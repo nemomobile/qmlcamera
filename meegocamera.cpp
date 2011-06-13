@@ -24,6 +24,7 @@
 
 MeegoCamera::MeegoCamera(bool visible): QObject(),
     m_uiVisible(visible),
+    m_background(!visible),
     m_gpioFile(-1),
     m_gpioNotifier(0),
     m_server(0),
@@ -67,7 +68,7 @@ MeegoCamera::MeegoCamera(bool visible): QObject(),
     m_coverState = !getSwitchState(m_gpioFile, 9);
 
     if (m_uiVisible)
-        showUI(true);
+        showUI();
 
     //qDebug() << Q_FUNC_INFO << "UI created  ";
 }
@@ -129,7 +130,12 @@ void MeegoCamera::createCamera()
         m_view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
         // Qt.quit() called in embedded .qml by default only emits
         // quit() signal, so do this (optionally use Qt.exit()).
-        QObject::connect(m_view->engine(), SIGNAL(quit()), this, SIGNAL(quit()));
+        // If application was started with background flag, then just hide UI.
+        if ( m_background )
+            QObject::connect(m_view->engine(), SIGNAL(quit()), this, SLOT(hideUI()));
+        else
+            QObject::connect(m_view->engine(), SIGNAL(quit()), this, SIGNAL(quit()));
+
         // QObject::connect(view.engine(), SIGNAL(()), qApp, SLOT(quit()));
         m_view->setGeometry(QRect(0, 0, 800, 480));
         m_view->installEventFilter(this);
@@ -175,53 +181,69 @@ void MeegoCamera::HandleGpioKeyEvent(struct input_event &ev)
         }
     } else if (ev.code == 212 && ev.value == 1 ) { // Camera button pressed
         // Check if UI is running and show it if not
-        showUI(true);
+        showUI();
     } else if ((ev.code == 9 && ev.value == 0) ) { // Lens cover opened
         //qDebug() << Q_FUNC_INFO << "lens cover opened ->";
         // Check if UI is running and show it if not
         m_coverState = true;
-        showUI(true);
+        showUI();
         m_view->rootObject()->setProperty("lensCoverStatus",true);
         //qDebug() << Q_FUNC_INFO << "lens cover opened <-";
     } else if (ev.code == 9 && ev.value == 1) { // Lens cover closed
         //qDebug() << Q_FUNC_INFO << "lens cover closed ->";
         m_coverState = false;
-        showUI(false);
+        hideUI();
         //qDebug() << Q_FUNC_INFO << "lens cover closed <-";
     }
 }
 
-void MeegoCamera::showUI(bool show)
+
+void MeegoCamera::hideUI()
 {
-    if (show) {
-        //qDebug() << Q_FUNC_INFO << "show ->";
-        m_volumeKeyResource->acquire();
-        createCamera();
+    //qDebug() << Q_FUNC_INFO << "->";
+    m_uiVisible = false;
 
-        //qDebug() << Q_FUNC_INFO << "show: camera created";
+    m_volumeKeyResource->release();
 
-        m_view->showFullScreen();
+    if (m_view) {
+        //qDebug() << Q_FUNC_INFO << "hide";
 
-        //qDebug() << Q_FUNC_INFO << "show: UI shown";
+        // LOL part starts here
 
-        m_view->rootObject()->setVisible(true);
+        // Viewfinder must be running when the view is deleted.
+        // Otherwise the viewfinder (xvoverlay) goes to
+        // inconsistent state when the view is created again.
+        m_view->rootObject()->setProperty("lensCoverStatus",true);
         m_view->rootObject()->setProperty("active",true);
-        m_uiVisible = true;
-        //qDebug() << Q_FUNC_INFO << "show <-";
-    } else {
-        //qDebug() << Q_FUNC_INFO << "hide ->";
-        if(m_view)
-            m_view->close();
 
-        m_uiVisible = false;
-        //qDebug() << Q_FUNC_INFO << "hide <-";
+        m_view->deleteLater();
+        m_view = 0;
     }
+    //qDebug() << Q_FUNC_INFO << "<-";
+}
+
+void MeegoCamera::showUI()
+{
+    //qDebug() << Q_FUNC_INFO << "show ->";
+    m_volumeKeyResource->acquire();
+    createCamera();
+
+    //qDebug() << Q_FUNC_INFO << "show: camera created";
+
+    m_view->showFullScreen();
+
+    //qDebug() << Q_FUNC_INFO << "show: UI shown";
+
+    m_view->rootObject()->setVisible(true);
+    m_view->rootObject()->setProperty("active",true);
+    m_uiVisible = true;
+    //qDebug() << Q_FUNC_INFO << "show <-";
 }
 
 void MeegoCamera::newConnection()
 {
     while (m_server->hasPendingConnections()) {
-        showUI(true);
+        showUI();
         QLocalSocket *socket = m_server->nextPendingConnection();
         connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
         m_connections.push_back(socket);
@@ -268,21 +290,17 @@ bool MeegoCamera::eventFilter(QObject* watched, QEvent* event)
 
             m_volumeKeyResource->release();
 
-            // LOL part starts here
-
-            // Viewfinder must be running when the view is deleted.
-            // Otherwise the viewfinder (xvoverlay) goes to
-            // inconsistent state when the view is created again.
-            m_view->rootObject()->setProperty("lensCoverStatus",true);
-            m_view->rootObject()->setProperty("active",true);
-
-            m_view->deleteLater();
-            m_view = 0;
+            if ( !m_background ) {
+                emit quit();
+            } else {
+                hideUI();
+            }
         }
     }
 
     return false;
 }
+
 
 void MeegoCamera::cleanSocket()
 {
