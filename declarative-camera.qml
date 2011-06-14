@@ -40,6 +40,7 @@
 
 import Qt 4.7
 import QtMultimediaKit 1.1
+import com.meego.MeegoHandsetCamera 1.0
 
 Rectangle {
     id : cameraUI
@@ -192,7 +193,7 @@ Rectangle {
     Binding { target: settings; property: "whiteBalanceMode"; value: stillControls.whiteBalance; when: cameraUI.state != "Standby" }
     Binding { target: settings; property: "exposureCompensation"; value: stillControls.exposureCompensation; when: cameraUI.state != "Standby" }
 
-    Camera {
+    MeegoCamera {
         id: camera
         objectName: "camera"
         x: 0
@@ -219,7 +220,7 @@ Rectangle {
         }
 
         onCameraStateChanged : {
-            //console.log("meego-handset-camera: CAMERA STATE = " + cameraState)
+            console.log("meego-handset-camera: CAMERA STATE = " + cameraState)
             visible = true
         }
         
@@ -292,7 +293,6 @@ Rectangle {
         anchors.fill: parent
         camera: camera
         onPreviewSelected: changeState("PhotoPreview")
-        //onPreviewSelected: mainWindow.showMinimized()
     }
 
     PhotoPreview {

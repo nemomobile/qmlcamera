@@ -1,6 +1,6 @@
 TEMPLATE=app
 
-CONFIG+=link_pkgconfig
+CONFIG += mobility link_pkgconfig
 
 PKGCONFIG += libresourceqt1
 
@@ -9,13 +9,19 @@ DEFINES+=Q_WS_MEEGO
 
 QT += core declarative network opengl
 
+MOBILITY = multimedia
+
 HEADERS += \
     qmlcamerasettings.h \
-    meegocamera.h
+    meegocamera.h \
+    qdeclarativecamera_p.h \
+    qdeclarativecamerapreviewprovider_p.h
 
 SOURCES += main.cpp \
     qmlcamerasettings.cpp \
-    meegocamera.cpp
+    meegocamera.cpp \
+    qdeclarativecamera.cpp \
+    qdeclarativecamerapreviewprovider.cpp
 
 TARGET = meego-handset-camera
 target.path=/usr/bin

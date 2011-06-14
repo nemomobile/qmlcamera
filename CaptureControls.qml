@@ -40,11 +40,13 @@
 
 import Qt 4.7
 import QtMultimediaKit 1.1
+import com.meego.MeegoHandsetCamera 1.0
 
 FocusScope {
     id : captureControls
 
-    property Camera camera
+    //property MeegoCamera camera
+    property QtObject camera
     property bool previewAvailable : false
     property alias settingsPaneWidth : buttonsColumn.width
 
@@ -69,31 +71,31 @@ FocusScope {
         CameraButton {
             text: "Capture"
             onClicked: camera.captureImage()
-            visible: camera.cameraState == Camera.ActiveState
+            visible: camera.cameraState == MeegoCamera.ActiveState
         }
 
         CameraPropertyButton {
             id : flashModesButton
-            value: Camera.FlashOff
+            value: MeegoCamera.FlashOff
             model: ListModel {
                 ListElement {
                     icon: "images/camera_flash_auto.png"
-                    value: Camera.FlashAuto
+                    value: MeegoCamera.FlashAuto
                     text: "Auto"
                 }
                 ListElement {
                     icon: "images/camera_flash_off.png"
-                    value: Camera.FlashOff
+                    value: MeegoCamera.FlashOff
                     text: "Off"
                 }
                 ListElement {
                     icon: "images/camera_flash_fill.png"
-                    value: Camera.FlashOn
+                    value: MeegoCamera.FlashOn
                     text: "On"
                 }
                 ListElement {
                     icon: "images/camera_flash_redeye.png"
-                    value: Camera.FlashRedEyeReduction
+                    value: MeegoCamera.FlashRedEyeReduction
                     text: "Red Eye Reduction"
                 }
             }
@@ -107,31 +109,31 @@ FocusScope {
 
         CameraPropertyButton {
             id : wbModesButton
-            value: Camera.WhiteBalanceAuto
+            value: MeegoCamera.WhiteBalanceAuto
             model: ListModel {
                 ListElement {
                     icon: "images/camera_auto_mode.png"
-                    value: Camera.WhiteBalanceAuto
+                    value: MeegoCamera.WhiteBalanceAuto
                     text: "Auto"
                 }
                 ListElement {
                     icon: "images/camera_white_balance_sunny.png"
-                    value: Camera.WhiteBalanceSunlight
+                    value: MeegoCamera.WhiteBalanceSunlight
                     text: "Sunlight"
                 }
                 ListElement {
                     icon: "images/camera_white_balance_cloudy.png"
-                    value: Camera.WhiteBalanceCloudy
+                    value: MeegoCamera.WhiteBalanceCloudy
                     text: "Cloudy"
                 }
                 ListElement {
                     icon: "images/camera_white_balance_incandescent.png"
-                    value: Camera.WhiteBalanceIncandescent
+                    value: MeegoCamera.WhiteBalanceIncandescent
                     text: "Incandescent"
                 }
                 ListElement {
                     icon: "images/camera_white_balance_flourescent.png"
-                    value: Camera.WhiteBalanceFluorescent
+                    value: MeegoCamera.WhiteBalanceFluorescent
                     text: "Fluorescent"
                 }
             }
@@ -173,7 +175,7 @@ FocusScope {
         height: childrenRect.height
         width: childrenRect.width
 
-        visible : camera.lockStatus == Camera.Locked
+        visible : camera.lockStatus == MeegoCamera.Locked
 
         Rectangle {
             opacity: 0.4
@@ -221,7 +223,7 @@ FocusScope {
     }
 
     ZoomControl {
-        visible: camera.cameraState == Camera.ActiveState
+        visible: camera.cameraState == MeegoCamera.ActiveState
         x : 0
         y : 0
         width : 100

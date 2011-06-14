@@ -17,6 +17,10 @@
 #include <QDeclarativeContext>
 #include <QtOpenGL/QGLWidget>
 #include <QKeyEvent>
+#include <QDeclarativeEngine>
+
+#include "qdeclarativecamera_p.h"
+#include "qdeclarativecamerapreviewprovider_p.h"
 
 
 #define GPIO_KEYS "/dev/input/gpio-keys"
@@ -32,6 +36,8 @@ MeegoCamera::MeegoCamera(bool visible): QObject(),
     m_view(0)
 {
     //qDebug() << Q_FUNC_INFO;
+
+    qmlRegisterType<QDeclarativeCamera>("com.meego.MeegoHandsetCamera", 1, 0, "MeegoCamera");
 
     m_server = new QLocalServer(this);
 
@@ -119,6 +125,8 @@ void MeegoCamera::createCamera()
         m_view = new QDeclarativeView;
 
         m_view->setViewport(new QGLWidget);
+
+        m_view->engine()->addImageProvider("meegocamera", new QDeclarativeCameraPreviewProvider);
 
         m_view->rootContext()->setContextProperty("settings", &m_settings);
         m_view->rootContext()->setContextProperty("mainWindow", m_view);
