@@ -193,6 +193,10 @@ Rectangle {
     Binding { target: settings; property: "whiteBalanceMode"; value: stillControls.whiteBalance; when: cameraUI.state != "Standby" }
     Binding { target: settings; property: "exposureCompensation"; value: stillControls.exposureCompensation; when: cameraUI.state != "Standby" }
 
+    CameraSettings {
+        id: settings
+    }
+
     MeegoCamera {
         id: camera
         objectName: "camera"
@@ -205,6 +209,9 @@ Rectangle {
         cameraState: "UnloadedState"
 
         captureResolution : settings.captureResolution
+        videoCaptureResolution: settings.videoCaptureResolution
+
+        videoEncodingQuality: settings.videoEncodingQuality
         
         previewResolution : camera.width + "x" + camera.height
         viewfinderResolution: settings.viewfinderResolution
@@ -228,8 +235,18 @@ Rectangle {
             if (event.key == Qt.Key_Camera || event.key == Qt.Key_WebCam ) {
                 // Capture button fully pressed
                 event.accepted = true;
-                // Take still image
-                camera.captureImage();
+
+                if(camera.cameraMode == MeegoCamera.CaptureVideo) {
+                    if(camera.recordingState == MeegoCamera.Recording)
+                        //camera.pauseRecording();
+                        camera.stopRecording();
+                    else
+                        camera.record();
+                } else {
+                    // Take still image
+                    camera.captureImage();
+                }
+
             } else if (event.key == Qt.Key_ZoomIn || event.key == Qt.Key_F7  ) {
                 // Zoom in
                 event.accepted = true;

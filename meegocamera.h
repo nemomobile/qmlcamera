@@ -12,7 +12,6 @@
 #include <QtDeclarative/QDeclarativeView>
 #include <policy/resource-set.h>
 
-#include "qmlcamerasettings.h"
 
 #define SERVER_NAME "/tmp/meegocamera"
 
@@ -65,7 +64,6 @@ private:
     QVector<QLocalSocket*> m_connections;
 
     QDeclarativeView *m_view;
-    QmlCameraSettings m_settings;
 
     ResourcePolicy::ResourceSet* m_volumeKeyResource;
 };

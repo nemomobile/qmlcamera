@@ -53,6 +53,7 @@
 #include <qmediarecorder.h>
 
 
+
 QT_BEGIN_HEADER
 
 QT_BEGIN_NAMESPACE
@@ -85,8 +86,11 @@ class QDeclarativeCamera : public QDeclarativeItem
 
     Q_PROPERTY(QSize captureResolution READ captureResolution WRITE setCaptureResolution NOTIFY captureResolutionChanged)
     Q_PROPERTY(QSize previewResolution READ previewResolution WRITE setPreviewResolution NOTIFY previewResolutionChanged)
+
     Q_PROPERTY(QSize videoCaptureResolution READ videoCaptureResolution WRITE setVideoCaptureResolution NOTIFY videoCaptureResolutionChanged)
     Q_PROPERTY(qreal videoCaptureFramerate READ videoCaptureFramerate WRITE setVideoCaptureFramerate NOTIFY videoCaptureFramerateChanged)
+    Q_PROPERTY(VideoEncodingQuality videoEncodingQuality READ videoEncodingQuality WRITE setVideoEncodingQuality NOTIFY videoEncodingQualityChanged )
+
     Q_PROPERTY(QSize viewfinderResolution READ viewfinderResolution WRITE setViewfinderResolution NOTIFY viewfinderResolutionChanged)
     Q_PROPERTY(qreal viewfinderFramerate READ viewfinderFramerate WRITE setViewfinderFramerate NOTIFY viewfinderFramerateChanged)
 
@@ -106,6 +110,7 @@ class QDeclarativeCamera : public QDeclarativeItem
     Q_ENUMS(FlashMode)
     Q_ENUMS(ExposureMode)
     Q_ENUMS(WhiteBalanceMode)
+    Q_ENUMS(VideoEncodingQuality)
 public:
     enum Mode
     {
@@ -144,15 +149,15 @@ public:
     };
 
     enum FlashMode {
-        FlashAuto = 0x1,
-        FlashOff = 0x2,
-        FlashOn = 0x4,
-        FlashRedEyeReduction  = 0x8,
-        FlashFill = 0x10,
-        FlashTorch = 0x20,
-        FlashSlowSyncFrontCurtain = 0x40,
-        FlashSlowSyncRearCurtain = 0x80,
-        FlashManual = 0x100
+        FlashAuto = QCameraExposure::FlashAuto,
+        FlashOff = QCameraExposure::FlashOff,
+        FlashOn = QCameraExposure::FlashOn,
+        FlashRedEyeReduction  = QCameraExposure::FlashRedEyeReduction,
+        FlashFill = QCameraExposure::FlashFill,
+        FlashTorch = QCameraExposure::FlashTorch,
+        FlashSlowSyncFrontCurtain = QCameraExposure::FlashSlowSyncFrontCurtain,
+        FlashSlowSyncRearCurtain = QCameraExposure::FlashSlowSyncRearCurtain,
+        FlashManual = QCameraExposure::FlashManual
     };
 
     enum ExposureMode {
@@ -182,6 +187,15 @@ public:
         WhiteBalanceFlash = 8,
         WhiteBalanceSunset = 9,
         WhiteBalanceVendor = 1000
+    };
+
+    enum VideoEncodingQuality
+    {
+        VeryLowQuality = QtMultimediaKit::VeryLowQuality,
+        LowQuality = QtMultimediaKit::LowQuality,
+        NormalQuality = QtMultimediaKit::NormalQuality,
+        HighQuality = QtMultimediaKit::HighQuality,
+        VeryHighQuality = QtMultimediaKit::VeryHighQuality
     };
 
     QDeclarativeCamera(QDeclarativeItem *parent = 0);
@@ -218,6 +232,7 @@ public:
     QSize previewResolution() const;
     QSize videoCaptureResolution() const;
     qreal videoCaptureFramerate() const;
+    VideoEncodingQuality videoEncodingQuality() const;
     QSize viewfinderResolution() const;
     qreal viewfinderFramerate() const;
 
@@ -259,6 +274,7 @@ public Q_SLOTS:
     void setPreviewResolution(const QSize &size);
     void setVideoCaptureResolution(const QSize &size);
     void setVideoCaptureFramerate(qreal framerate);
+    void setVideoEncodingQuality(QDeclarativeCamera::VideoEncodingQuality quality);
     void setViewfinderResolution(const QSize &size);
     void setViewfinderFramerate(qreal framerate);
 
@@ -299,6 +315,7 @@ Q_SIGNALS:
     void previewResolutionChanged(const QSize&);
     void videoCaptureResolutionChanged(const QSize&);
     void videoCaptureFramerateChanged(qreal);
+    void videoEncodingQualityChanged(QDeclarativeCamera::VideoEncodingQuality);
     void viewfinderResolutionChanged(const QSize&);
     void viewfinderFramerateChanged(qreal);
 

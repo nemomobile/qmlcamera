@@ -71,12 +71,37 @@ FocusScope {
         CameraButton {
             text: "Capture"
             onClicked: camera.captureImage()
-            visible: camera.cameraState == MeegoCamera.ActiveState
+            visible: camera.cameraMode == MeegoCamera.CaptureStillImage && camera.cameraState == MeegoCamera.ActiveState
+        }
+
+        CameraButton {
+            text: "Record"
+            visible: camera.cameraMode == MeegoCamera.CaptureVideo && camera.recordingState == MeegoCamera.Stopped
+            onClicked: camera.record()
+        }
+
+        CameraButton {
+            text: "Resume"
+            visible: camera.cameraMode == MeegoCamera.CaptureVideo && camera.recordingState == MeegoCamera.Paused
+            onClicked: camera.record()
+        }
+
+        CameraButton {
+            text: "Pause"
+            visible: camera.cameraMode == MeegoCamera.CaptureVideo && camera.recordingState == MeegoCamera.Recording
+            onClicked: camera.pauseRecording()
+        }
+
+        CameraButton {
+            text: "Stop"
+            visible: camera.cameraMode == MeegoCamera.CaptureVideo && camera.recordingState != MeegoCamera.Stopped
+            onClicked: camera.stopRecording()
         }
 
         CameraPropertyButton {
             id : flashModesButton
             value: MeegoCamera.FlashOff
+            visible: camera.cameraMode == MeegoCamera.CaptureStillImage
             model: ListModel {
                 ListElement {
                     icon: "images/camera_flash_auto.png"
@@ -152,7 +177,36 @@ FocusScope {
         CameraButton {
             text: "View"
             onClicked: captureControls.previewSelected()
-            visible: captureControls.previewAvailable
+            visible: camera.cameraMode == MeegoCamera.CaptureStillImage && captureControls.previewAvailable
+        }
+    }
+
+    CameraButton {
+        id: modeButton
+        anchors.right : parent.right
+        anchors.rightMargin: 8
+        anchors.bottom : quitButton.top
+        anchors.bottomMargin: 8
+        visible: true
+        state: camera.cameraMode == MeegoCamera.CaptureStillImage ? "stillCapture" : "videoCapture"
+
+        states: [
+            State {
+                name: "stillCapture"
+                PropertyChanges { target: modeButton; text: "Still" }
+            },
+            State {
+                name: "videoCapture"
+                PropertyChanges { target: modeButton; text: "Video" }
+            }
+        ]
+
+        onClicked: {
+            if( camera.cameraMode == MeegoCamera.CaptureStillImage ) {
+                camera.cameraMode = MeegoCamera.CaptureVideo;
+            } else {
+                camera.cameraMode = MeegoCamera.CaptureStillImage;
+            }
         }
     }
 

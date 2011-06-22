@@ -275,7 +275,7 @@ QDeclarativeCamera::QDeclarativeCamera(QDeclarativeItem *parent) :
     m_isStateSet(false),
     m_isValid(true)
 {
-    qDebug() << Q_FUNC_INFO << "New instance ->";
+    m_videoSettings.setEncodingMode(QtMultimediaKit::ConstantQualityEncoding);
 
 #if defined(Q_OS_SYMBIAN)
     RProcess thisProcess;
@@ -332,8 +332,6 @@ QDeclarativeCamera::QDeclarativeCamera(QDeclarativeItem *parent) :
     //stop() is called after constructor,
     //or to set the rest of camera settings before starting the camera
     QMetaObject::invokeMethod(this, "_q_applyPendingState", Qt::QueuedConnection);
-
-    qDebug() << Q_FUNC_INFO << "<-";
 }
 
 QDeclarativeCamera::~QDeclarativeCamera()
@@ -614,7 +612,7 @@ QDeclarativeCamera::ExposureMode QDeclarativeCamera::exposureMode() const
 int QDeclarativeCamera::flashMode() const
 {
     if (!m_isValid)
-        return 0;
+        return QDeclarativeCamera::FlashAuto;
 
     return m_exposure->flashMode();
 }
@@ -716,6 +714,14 @@ qreal QDeclarativeCamera::videoCaptureFramerate() const
     return m_videoSettings.frameRate();
 }
 
+QDeclarativeCamera::VideoEncodingQuality QDeclarativeCamera::videoEncodingQuality() const
+{
+    if (!m_isValid)
+        return QDeclarativeCamera::NormalQuality;
+
+    return static_cast<QDeclarativeCamera::VideoEncodingQuality>(m_videoSettings.quality());
+}
+
 QSize QDeclarativeCamera::viewfinderResolution() const
 {
     if (!m_isValid)
@@ -785,6 +791,20 @@ void QDeclarativeCamera::setVideoCaptureFramerate(qreal framerate)
         }
 
         emit videoCaptureFramerateChanged(framerate);
+    }
+}
+
+void QDeclarativeCamera::setVideoEncodingQuality(QDeclarativeCamera::VideoEncodingQuality quality)
+{
+    if (m_isValid && m_videoSettings.quality() != static_cast<QtMultimediaKit::EncodingQuality>(quality)) {
+        m_videoSettings.setQuality(static_cast<QtMultimediaKit::EncodingQuality>(quality));
+
+        if (!m_imageSettingsChanged) {
+            m_imageSettingsChanged = true;
+            QMetaObject::invokeMethod(this, "_q_updateImageSettings", Qt::QueuedConnection);
+        }
+
+        emit videoEncodingQualityChanged(quality);
     }
 }
 

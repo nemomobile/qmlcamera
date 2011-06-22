@@ -6,34 +6,42 @@
 class QmlCameraSettings : public QSettings
 {
     Q_OBJECT
-    Q_PROPERTY(QVariant whiteBalanceMode READ whiteBalanceMode WRITE setWhiteBalanceMode NOTIFY whiteBalanceModeChanged)
-    Q_PROPERTY(QVariant flashMode READ flashMode WRITE setFlashMode NOTIFY flashModeChanged)
-    Q_PROPERTY(QVariant exposureCompensation READ exposureCompensation WRITE setExposureCompensation NOTIFY exposureCompensationChanged)
+    Q_PROPERTY(int whiteBalanceMode READ whiteBalanceMode WRITE setWhiteBalanceMode NOTIFY whiteBalanceModeChanged)
+    Q_PROPERTY(int flashMode READ flashMode WRITE setFlashMode NOTIFY flashModeChanged)
+    Q_PROPERTY(int exposureCompensation READ exposureCompensation WRITE setExposureCompensation NOTIFY exposureCompensationChanged)
     Q_PROPERTY(QVariant captureResolution READ captureResolution WRITE setCaptureResolution NOTIFY captureResolutionChanged)
+    Q_PROPERTY(QVariant videoCaptureResolution READ videoCaptureResolution WRITE setVideoCaptureResolution NOTIFY videoCaptureResolutionChanged)
     Q_PROPERTY(QVariant viewfinderResolution READ viewfinderResolution WRITE setViewfinderResolution NOTIFY viewfinderResolutionChanged)
+    Q_PROPERTY(int videoEncodingQuality READ videoEncodingQuality WRITE setVideoEncodingQuality NOTIFY videoEncodingQualityChanged)
 public:
     explicit QmlCameraSettings(QObject *parent = 0);
 
-    QVariant whiteBalanceMode() const;
-    QVariant flashMode() const;
-    QVariant exposureCompensation() const;
+    int whiteBalanceMode() const;
+    int flashMode() const;
+    int exposureCompensation() const;
     QVariant captureResolution() const;
+    QVariant videoCaptureResolution() const;
     QVariant viewfinderResolution() const;
+    int videoEncodingQuality() const;
 
 signals:
 
-    void whiteBalanceModeChanged(QVariant);
-    void flashModeChanged(QVariant);
-    void exposureCompensationChanged(QVariant);
+    void whiteBalanceModeChanged(int);
+    void flashModeChanged(int);
+    void exposureCompensationChanged(int);
     void captureResolutionChanged(QVariant);
+    void videoCaptureResolutionChanged(QVariant);
     void viewfinderResolutionChanged(QVariant);
+    void videoEncodingQualityChanged(int);
 public slots:
 
-    void setWhiteBalanceMode(QVariant);
-    void setFlashMode(QVariant);
-    void setExposureCompensation(QVariant);
+    void setWhiteBalanceMode(int);
+    void setFlashMode(int);
+    void setExposureCompensation(int);
     void setCaptureResolution(QVariant);
+    void setVideoCaptureResolution(QVariant);
     void setViewfinderResolution(QVariant);
+    void setVideoEncodingQuality(int);
 };
 
 #endif // QMLCAMERASETTINGS_H
