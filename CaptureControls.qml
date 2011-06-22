@@ -45,9 +45,9 @@ import com.meego.MeegoHandsetCamera 1.0
 FocusScope {
     id : captureControls
 
-    //property MeegoCamera camera
     property QtObject camera
     property bool previewAvailable : false
+    property bool videoModeEnabled : false
     property alias settingsPaneWidth : buttonsColumn.width
 
     property alias whiteBalance : wbModesButton.value
@@ -187,7 +187,7 @@ FocusScope {
         anchors.rightMargin: 8
         anchors.bottom : quitButton.top
         anchors.bottomMargin: 8
-        visible: true
+        visible: videoModeEnabled
         state: camera.cameraMode == MeegoCamera.CaptureStillImage ? "stillCapture" : "videoCapture"
 
         states: [

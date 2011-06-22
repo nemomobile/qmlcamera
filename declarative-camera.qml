@@ -66,6 +66,8 @@ Rectangle {
     // false = not active
     property bool active : false
 
+    property alias videoModeEnabled: stillControls.videoModeEnabled
+
     states: [
         State {
             name: "Standby"

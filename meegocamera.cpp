@@ -18,6 +18,7 @@
 #include <QtOpenGL/QGLWidget>
 #include <QKeyEvent>
 #include <QDeclarativeEngine>
+#include <QFileInfo>
 
 #include "qdeclarativecamera_p.h"
 #include "qdeclarativecamerapreviewprovider_p.h"
@@ -134,7 +135,12 @@ void MeegoCamera::createCamera()
 
         m_view->setSource(QUrl(mainQmlApp));
 
-        m_view->rootObject()->setProperty("lensCoverStatus",m_coverState);
+        m_view->rootObject()->setProperty("lensCoverStatus", m_coverState);
+
+        // Enable video capturing only if ti-dsp codecs are installed and running.
+        // Video recording does not work in current camera pipelinewithout them.
+        QFileInfo fi("/dev/DspBridge");
+        m_view->rootObject()->setProperty("videoModeEnabled", fi.exists());
 
         m_view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
         // Qt.quit() called in embedded .qml by default only emits
