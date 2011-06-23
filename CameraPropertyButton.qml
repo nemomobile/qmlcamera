@@ -47,20 +47,14 @@ Item {
     property alias model : popup.model
     property bool popupVisible : popup.state == "visible"
 
-    width : 144
+    width : 100
     height: 70
 
     function closePopup() {
         popup.state = "invisible"
     }
 
-    BorderImage {
-        id: buttonImage
-        source: "images/toolbutton.sci"
-        width: propertyButton.width; height: propertyButton.height
-    }
-
-    CameraButton {
+    ImageButton {
         anchors.fill: parent
         Image {
             anchors.centerIn: parent

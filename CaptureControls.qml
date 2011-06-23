@@ -58,45 +58,44 @@ FocusScope {
 
     Column {
         id: buttonsColumn
-        spacing : 8
+        spacing : 4
         anchors.right : parent.right
         anchors.rightMargin: 8
         anchors.top : parent.top
-        anchors.topMargin: 8
+        anchors.topMargin: 32
 
-//        FocusButton {
-//            camera: captureControls.camera
-//        }
-
-        CameraButton {
-            text: "Capture"
+        ImageButton {
+            width : 30
+            height: 30
+            anchors.horizontalCenter: parent.horizontalCenter
+            source: "images/icon-m-toolbar-camera.svg"
             onClicked: camera.captureImage()
             visible: camera.cameraMode == MeegoCamera.CaptureStillImage && camera.cameraState == MeegoCamera.ActiveState
         }
 
-        CameraButton {
-            text: "Record"
-            visible: camera.cameraMode == MeegoCamera.CaptureVideo && camera.recordingState == MeegoCamera.Stopped
+        ImageButton {
+            width : 30
+            height: 30
+            anchors.horizontalCenter: parent.horizontalCenter
+            source: "images/icon-m-camera-video-record.svg"
+            visible: camera.cameraMode == MeegoCamera.CaptureVideo && (camera.recordingState == MeegoCamera.Stopped || camera.recordingState == MeegoCamera.Paused)
             onClicked: camera.record()
         }
 
-        CameraButton {
-            text: "Resume"
-            visible: camera.cameraMode == MeegoCamera.CaptureVideo && camera.recordingState == MeegoCamera.Paused
-            onClicked: camera.record()
-        }
-
-        CameraButton {
-            text: "Pause"
+        ImageButton {
+            width : 30
+            height: 30
+            anchors.horizontalCenter: parent.horizontalCenter
+            source: "images/icon-m-camera-pause.svg"
             visible: camera.cameraMode == MeegoCamera.CaptureVideo && camera.recordingState == MeegoCamera.Recording
             onClicked: camera.pauseRecording()
         }
 
-        CameraButton {
-            text: "Stop"
-            visible: camera.cameraMode == MeegoCamera.CaptureVideo && camera.recordingState != MeegoCamera.Stopped
-            onClicked: camera.stopRecording()
-        }
+//        CameraButton {
+//            text: "Stop"
+//            visible: camera.cameraMode == MeegoCamera.CaptureVideo && camera.recordingState != MeegoCamera.Stopped
+//            onClicked: camera.stopRecording()
+//        }
 
         CameraPropertyButton {
             id : flashModesButton
@@ -104,23 +103,23 @@ FocusScope {
             visible: camera.cameraMode == MeegoCamera.CaptureStillImage
             model: ListModel {
                 ListElement {
-                    icon: "images/camera_flash_auto.png"
-                    value: MeegoCamera.FlashAuto
+                    icon: "images/icon-m-camera-flash-auto-screen.svg"
+                    value: Camera.FlashAuto
                     text: "Auto"
                 }
                 ListElement {
-                    icon: "images/camera_flash_off.png"
-                    value: MeegoCamera.FlashOff
+                    icon: "images/icon-m-camera-flash-off-screen.svg"
+                    value: Camera.FlashOff
                     text: "Off"
                 }
                 ListElement {
-                    icon: "images/camera_flash_fill.png"
-                    value: MeegoCamera.FlashOn
+                    icon: "images/icon-m-camera-flash-always-screen.svg"
+                    value: Camera.FlashOn
                     text: "On"
                 }
                 ListElement {
-                    icon: "images/camera_flash_redeye.png"
-                    value: MeegoCamera.FlashRedEyeReduction
+                    icon: "images/icon-m-camera-flash-red-eye-screen.svg"
+                    value: Camera.FlashRedEyeReduction
                     text: "Red Eye Reduction"
                 }
             }
@@ -137,28 +136,28 @@ FocusScope {
             value: MeegoCamera.WhiteBalanceAuto
             model: ListModel {
                 ListElement {
-                    icon: "images/camera_auto_mode.png"
-                    value: MeegoCamera.WhiteBalanceAuto
+                    icon: "images/icon-m-camera-whitebalance-auto-screen.svg"
+                    value: Camera.WhiteBalanceAuto
                     text: "Auto"
                 }
                 ListElement {
-                    icon: "images/camera_white_balance_sunny.png"
-                    value: MeegoCamera.WhiteBalanceSunlight
+                    icon: "images/icon-m-camera-whitebalance-sunny-screen.svg"
+                    value: Camera.WhiteBalanceSunlight
                     text: "Sunlight"
                 }
                 ListElement {
-                    icon: "images/camera_white_balance_cloudy.png"
-                    value: MeegoCamera.WhiteBalanceCloudy
+                    icon: "images/icon-m-camera-whitebalance-cloudy-screen.svg"
+                    value: Camera.WhiteBalanceCloudy
                     text: "Cloudy"
                 }
                 ListElement {
-                    icon: "images/camera_white_balance_incandescent.png"
-                    value: MeegoCamera.WhiteBalanceIncandescent
+                    icon: "images/icon-m-camera-whitebalance-tungsten-screen.svg"
+                    value: Camera.WhiteBalanceIncandescent
                     text: "Incandescent"
                 }
                 ListElement {
-                    icon: "images/camera_white_balance_flourescent.png"
-                    value: MeegoCamera.WhiteBalanceFluorescent
+                    icon: "images/icon-m-camera-whitebalance-fluorescent-screen.svg"
+                    value: Camera.WhiteBalanceFluorescent
                     text: "Fluorescent"
                 }
             }
@@ -174,6 +173,7 @@ FocusScope {
             id : exposureCompensationButton
         }
 
+
         CameraButton {
             text: "View"
             onClicked: captureControls.previewSelected()
@@ -185,7 +185,7 @@ FocusScope {
         id: modeButton
         anchors.right : parent.right
         anchors.rightMargin: 8
-        anchors.bottom : quitButton.top
+        anchors.bottom : parent.bottom
         anchors.bottomMargin: 8
         visible: videoModeEnabled
         state: camera.cameraMode == MeegoCamera.CaptureStillImage ? "stillCapture" : "videoCapture"
@@ -208,16 +208,6 @@ FocusScope {
                 camera.cameraMode = MeegoCamera.CaptureStillImage;
             }
         }
-    }
-
-    CameraButton {
-        id: quitButton
-        anchors.right : parent.right
-        anchors.rightMargin: 8
-        anchors.bottom : parent.bottom
-        anchors.bottomMargin: 8
-        text: "Quit"
-        onClicked: Qt.quit()
     }
 
     Item {

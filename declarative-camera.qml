@@ -309,7 +309,11 @@ Rectangle {
 
     CaptureControls {
         id: stillControls
-        anchors.fill: parent
+        //anchors.fill: parent
+        anchors.top: homeButton.bottom
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
         camera: camera
         onPreviewSelected: changeState("PhotoPreview")
     }
@@ -329,20 +333,36 @@ Rectangle {
         }
     }
 
+    // TODO: Make top bar component for these buttons
     ImageButton {
         id: homeButton
+
+        width: 48
+        height: 48
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.topMargin: 6
         anchors.leftMargin: 6
 
-        width: 48
-        height: 48
-
         source: "images/icon-m-framework-home.svg"
 
         onClicked: mainWindow.showMinimized()
+    }
+
+    ImageButton {
+        id: quitButton
+
+        width : 48
+        height: 48
+
+        anchors.top : parent.top
+        anchors.right : parent.right
+        anchors.topMargin: 6
+        anchors.rightMargin: 6
+        source: "images/icon-m-framework-close.svg"
+
+        onClicked:  Qt.quit()
     }
 
 }

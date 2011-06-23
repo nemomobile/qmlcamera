@@ -287,6 +287,7 @@ QDeclarativeCamera::QDeclarativeCamera(QDeclarativeItem *parent) :
 #endif
     m_camera = new QCamera(this);
     m_viewfinderItem = new QGraphicsVideoItem(this);
+    m_viewfinderItem->setAspectRatioMode(Qt::KeepAspectRatioByExpanding);
     m_camera->setViewfinder(m_viewfinderItem);
     m_exposure = m_camera->exposure();
     m_focus = m_camera->focus();
@@ -560,9 +561,14 @@ void QDeclarativeCamera::keyPressEvent(QKeyEvent * event)
 
     switch (event->key()) {
     case Qt::Key_CameraFocus:
-    case Qt::Key_F:
         if (m_camera->captureMode() == QCamera::CaptureStillImage) {
             m_camera->searchAndLock();
+            return;
+        } else if (m_camera->captureMode() == QCamera::CaptureVideo) {
+            if(m_recorder->state() == QMediaRecorder::PausedState)
+                record();
+            else if(m_recorder->state() == QMediaRecorder::RecordingState)
+                pauseRecording();
             return;
         }
         break;
@@ -570,6 +576,12 @@ void QDeclarativeCamera::keyPressEvent(QKeyEvent * event)
     case Qt::Key_WebCam:
         if (m_camera->captureMode() == QCamera::CaptureStillImage) {
             captureImage();
+            return;
+        } else if (m_camera->captureMode() == QCamera::CaptureVideo) {
+            if(m_recorder->state() == QMediaRecorder::StoppedState)
+                record();
+            else
+                stopRecording();
             return;
         }
         break;

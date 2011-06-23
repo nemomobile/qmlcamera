@@ -48,14 +48,15 @@ Item {
     property string text
     property color color: "white"
 
-    width : 144
+    width : 100
     height: 70
 
     BorderImage {
         id: buttonImage
-        source: "images/toolbutton.sci"
+        //source: "images/toolbutton.sci"
         width: button.width; height: button.height
     }
+
     MouseArea {
         id: mouseRegion
         anchors.fill: buttonImage

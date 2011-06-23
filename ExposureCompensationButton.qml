@@ -45,14 +45,9 @@ Item {
     property alias value : flickableList.value
     signal clicked
 
-    width : 144
+    width : 100
     height: 70
 
-    BorderImage {
-        id: buttonImage
-        source: "images/toolbutton.sci"
-        width: exposureCompensation.width; height: exposureCompensation.height
-    }
 
     Text {
         text: "Ev:"
@@ -63,7 +58,7 @@ Item {
     }
 
     FlickableList {
-        anchors.fill: buttonImage
+	anchors.fill: parent
         id: flickableList
         property real value : 0.0
         items: ["-2", "-1.5", "-1", "-0.5", "0", "+0.5", "+1", "+1.5", "+2"]
