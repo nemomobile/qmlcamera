@@ -62,12 +62,27 @@ FocusScope {
         anchors.top : parent.top
         anchors.topMargin: 8
 
-//        FocusButton {
-//            camera: captureControls.camera
-//        }
+	ImageButton {
+	    id: quitButton
+	    width : 144
+	    height: 70
+	    Image {
+		anchors.centerIn: parent
+		source: "images/icon-m-framework-close.svg"
+	    }
+	    onClicked:  Qt.quit()
+	}
 
-        CameraButton {
-            text: "Capture"
+
+
+	ImageButton {
+
+	    width : 144
+   	    height: 70
+	    Image {
+		    anchors.centerIn: parent
+		    source: "images/icon-m-toolbar-camera.svg"
+	    }
             onClicked: camera.captureImage()
             visible: camera.cameraState == Camera.ActiveState
         }
@@ -77,22 +92,22 @@ FocusScope {
             value: Camera.FlashOff
             model: ListModel {
                 ListElement {
-                    icon: "images/camera_flash_auto.png"
+                    icon: "images/icon-m-camera-flash-auto-screen.svg"
                     value: Camera.FlashAuto
                     text: "Auto"
                 }
                 ListElement {
-                    icon: "images/camera_flash_off.png"
+                    icon: "images/icon-m-camera-flash-off-screen.svg"
                     value: Camera.FlashOff
                     text: "Off"
                 }
                 ListElement {
-                    icon: "images/camera_flash_fill.png"
+                    icon: "images/icon-m-camera-flash-always-screen.svg"
                     value: Camera.FlashOn
                     text: "On"
                 }
                 ListElement {
-                    icon: "images/camera_flash_redeye.png"
+                    icon: "images/icon-m-camera-flash-red-eye-screen.svg"
                     value: Camera.FlashRedEyeReduction
                     text: "Red Eye Reduction"
                 }
@@ -110,27 +125,27 @@ FocusScope {
             value: Camera.WhiteBalanceAuto
             model: ListModel {
                 ListElement {
-                    icon: "images/camera_auto_mode.png"
+                    icon: "images/icon-m-camera-whitebalance-auto-screen.svg"
                     value: Camera.WhiteBalanceAuto
                     text: "Auto"
                 }
                 ListElement {
-                    icon: "images/camera_white_balance_sunny.png"
+                    icon: "images/icon-m-camera-whitebalance-sunny-screen.svg"
                     value: Camera.WhiteBalanceSunlight
                     text: "Sunlight"
                 }
                 ListElement {
-                    icon: "images/camera_white_balance_cloudy.png"
+                    icon: "images/icon-m-camera-whitebalance-cloudy-screen.svg"
                     value: Camera.WhiteBalanceCloudy
                     text: "Cloudy"
                 }
                 ListElement {
-                    icon: "images/camera_white_balance_incandescent.png"
+                    icon: "images/icon-m-camera-whitebalance-tungsten-screen.svg"
                     value: Camera.WhiteBalanceIncandescent
                     text: "Incandescent"
                 }
                 ListElement {
-                    icon: "images/camera_white_balance_flourescent.png"
+                    icon: "images/icon-m-camera-whitebalance-fluorescent-screen.svg"
                     value: Camera.WhiteBalanceFluorescent
                     text: "Fluorescent"
                 }
@@ -147,6 +162,7 @@ FocusScope {
             id : exposureCompensationButton
         }
 
+
         CameraButton {
             text: "View"
             onClicked: captureControls.previewSelected()
@@ -154,15 +170,7 @@ FocusScope {
         }
     }
 
-    CameraButton {
-        id: quitButton
-        anchors.right : parent.right
-        anchors.rightMargin: 8
-        anchors.bottom : parent.bottom
-        anchors.bottomMargin: 8
-        text: "Quit"
-        onClicked: Qt.quit()
-    }
+
 
     Item {
         id: exposureDetails

@@ -53,9 +53,10 @@ Item {
 
     BorderImage {
         id: buttonImage
-        source: "images/toolbutton.sci"
+        //source: "images/toolbutton.sci"
         width: button.width; height: button.height
     }
+
     MouseArea {
         id: mouseRegion
         anchors.fill: buttonImage

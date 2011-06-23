@@ -54,13 +54,7 @@ Item {
         popup.state = "invisible"
     }
 
-    BorderImage {
-        id: buttonImage
-        source: "images/toolbutton.sci"
-        width: propertyButton.width; height: propertyButton.height
-    }
-
-    CameraButton {
+    ImageButton {
         anchors.fill: parent
         Image {
             anchors.centerIn: parent
