@@ -47,7 +47,7 @@ Item {
     property alias model : popup.model
     property bool popupVisible : popup.state == "visible"
 
-    width : 144
+    width : 100
     height: 70
 
     function closePopup() {

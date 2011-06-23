@@ -45,7 +45,7 @@ Item {
     property alias value : flickableList.value
     signal clicked
 
-    width : 144
+    width : 100
     height: 70
 
 

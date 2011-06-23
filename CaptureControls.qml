@@ -54,32 +54,46 @@ FocusScope {
 
     signal previewSelected
 
+
+
+
+    ImageButton {
+	id: quitButton
+	anchors.right : parent.right
+        anchors.rightMargin: 8
+        anchors.top : parent.top
+        anchors.topMargin: 18
+	width : 100
+	height: 60
+	Image {
+	    anchors.right : parent.right
+	    anchors.rightMargin: width/3
+		
+	    //anchors.centerIn: parent
+	    source: "images/icon-m-framework-close.svg"
+	    scale: 1.5
+	}
+	onClicked:  Qt.quit()
+    }
+
+
+
     Column {
         id: buttonsColumn
+// marginal
         spacing : 8
         anchors.right : parent.right
         anchors.rightMargin: 8
-        anchors.top : parent.top
+        anchors.top : quitButton.bottom
         anchors.topMargin: 8
 
-	ImageButton {
-	    id: quitButton
-	    width : 144
-	    height: 70
-	    Image {
-		anchors.centerIn: parent
-		source: "images/icon-m-framework-close.svg"
-	    }
-	    onClicked:  Qt.quit()
-	}
-
 
 
 	ImageButton {
-
-	    width : 144
+	    width : 100
    	    height: 70
 	    Image {
+		    
 		    anchors.centerIn: parent
 		    source: "images/icon-m-toolbar-camera.svg"
 	    }

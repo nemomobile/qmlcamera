@@ -48,7 +48,7 @@ Item {
     property string text
     property color color: "white"
 
-    width : 144
+    width : 100
     height: 70
 
     BorderImage {
