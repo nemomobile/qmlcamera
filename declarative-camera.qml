@@ -66,7 +66,8 @@ Rectangle {
     // false = not active
     property bool active : false
 
-    property alias videoModeEnabled: stillControls.videoModeEnabled
+//    property alias videoModeEnabled: stillControls.videoModeEnabled
+    property alias videoModeEnabled: bottomPane.videoModeEnabled
 
     states: [
         State {
@@ -74,6 +75,7 @@ Rectangle {
             StateChangeScript {
                 script: {
                     stillControls.visible = false
+                    bottomPane.visible = false
                     photoPreview.visible = false
                     camera.visible = false
                 }
@@ -84,6 +86,7 @@ Rectangle {
             StateChangeScript {
                 script: {
                     stillControls.visible = true
+                    bottomPane.visible = true
                     photoPreview.visible = false
                 }
             }
@@ -93,6 +96,7 @@ Rectangle {
             StateChangeScript {
                 script: {
                     stillControls.visible = false
+                    bottomPane.visible = false
                     photoPreview.visible = true
                     photoPreview.focus = true
                     camera.visible = false
@@ -224,7 +228,7 @@ Rectangle {
 
         onImageCaptured : {
             photoPreview.source = preview
-            stillControls.previewAvailable = true
+            bottomPane.previewAvailable = true
             changeState("PhotoPreview")
         }
 
@@ -309,13 +313,11 @@ Rectangle {
 
     CaptureControls {
         id: stillControls
-        //anchors.fill: parent
-        anchors.top: homeButton.bottom
-        anchors.bottom: parent.bottom
+        anchors.top: topPane.bottom
+        anchors.bottom: bottomPane.top
         anchors.left: parent.left
         anchors.right: parent.right
         camera: camera
-        onPreviewSelected: changeState("PhotoPreview")
     }
 
     PhotoPreview {
@@ -333,36 +335,34 @@ Rectangle {
         }
     }
 
-    // TODO: Make top bar component for these buttons
-    ImageButton {
-        id: homeButton
+    TopPane {
+        id: topPane
 
-        width: 48
-        height: 48
-
-        anchors.top: parent.top
         anchors.left: parent.left
-        anchors.topMargin: 6
-        anchors.leftMargin: 6
+        anchors.right: parent.right
+        anchors.top: parent.top
 
-        source: "images/icon-m-framework-home.svg"
-
-        onClicked: mainWindow.showMinimized()
-    }
-
-    ImageButton {
-        id: quitButton
-
-        width : 48
+        anchors.margins: 6
         height: 48
 
-        anchors.top : parent.top
-        anchors.right : parent.right
-        anchors.topMargin: 6
-        anchors.rightMargin: 6
-        source: "images/icon-m-framework-close.svg"
-
-        onClicked:  Qt.quit()
+        onHomePressed: mainWindow.showMinimized()
+        onQuitPressed: Qt.quit()
     }
+
+    BottomPane {
+        id: bottomPane
+
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+
+        anchors.margins: 6
+        height: 48
+
+        camera: camera
+
+        onPreviewSelected: changeState("PhotoPreview")
+    }
+
 
 }

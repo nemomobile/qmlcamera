@@ -41,3 +41,7 @@ config_file.path = /etc/xdg/Nokia
 
 #INSTALLS += autostart_entry target app_icon config_file
 INSTALLS += target app_icon config_file
+
+OTHER_FILES += \
+    TopPane.qml \
+    BottomPane.qml

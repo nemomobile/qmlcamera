@@ -11,6 +11,8 @@
         <file>PhotoPreview.qml</file>
         <file>ZoomControl.qml</file>
         <file>ImageButton.qml</file>
+        <file>TopPane.qml</file>
+        <file>BottomPane.qml</file>
         <file>images/camera_auto_mode.png</file>
         <file>images/camera_camera_setting.png</file>
         <file>images/icon-m-camera-flash-auto-screen.svg</file> 

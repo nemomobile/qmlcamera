@@ -46,8 +46,6 @@ FocusScope {
     id : captureControls
 
     property QtObject camera
-    property bool previewAvailable : false
-    property bool videoModeEnabled : false
     property alias settingsPaneWidth : buttonsColumn.width
 
     property alias whiteBalance : wbModesButton.value
@@ -171,42 +169,6 @@ FocusScope {
 
         ExposureCompensationButton {
             id : exposureCompensationButton
-        }
-
-
-        CameraButton {
-            text: "View"
-            onClicked: captureControls.previewSelected()
-            visible: camera.cameraMode == MeegoCamera.CaptureStillImage && captureControls.previewAvailable
-        }
-    }
-
-    CameraButton {
-        id: modeButton
-        anchors.right : parent.right
-        anchors.rightMargin: 8
-        anchors.bottom : parent.bottom
-        anchors.bottomMargin: 8
-        visible: videoModeEnabled
-        state: camera.cameraMode == MeegoCamera.CaptureStillImage ? "stillCapture" : "videoCapture"
-
-        states: [
-            State {
-                name: "stillCapture"
-                PropertyChanges { target: modeButton; text: "Still" }
-            },
-            State {
-                name: "videoCapture"
-                PropertyChanges { target: modeButton; text: "Video" }
-            }
-        ]
-
-        onClicked: {
-            if( camera.cameraMode == MeegoCamera.CaptureStillImage ) {
-                camera.cameraMode = MeegoCamera.CaptureVideo;
-            } else {
-                camera.cameraMode = MeegoCamera.CaptureStillImage;
-            }
         }
     }
 
