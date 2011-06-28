@@ -66,7 +66,7 @@ Rectangle {
     // false = not active
     property bool active : false
 
-//    property alias videoModeEnabled: stillControls.videoModeEnabled
+//    property alias videoModeEnabled: captureControls.videoModeEnabled
     property alias videoModeEnabled: bottomPane.videoModeEnabled
 
     states: [
@@ -74,7 +74,7 @@ Rectangle {
             name: "Standby"
             StateChangeScript {
                 script: {
-                    stillControls.visible = false
+                    captureControls.visible = false
                     bottomPane.visible = false
                     photoPreview.visible = false
                     camera.visible = false
@@ -85,7 +85,7 @@ Rectangle {
             name: "PhotoCapture"
             StateChangeScript {
                 script: {
-                    stillControls.visible = true
+                    captureControls.visible = true
                     bottomPane.visible = true
                     photoPreview.visible = false
                 }
@@ -95,7 +95,7 @@ Rectangle {
             name: "PhotoPreview"
             StateChangeScript {
                 script: {
-                    stillControls.visible = false
+                    captureControls.visible = false
                     bottomPane.visible = false
                     photoPreview.visible = true
                     photoPreview.focus = true
@@ -140,9 +140,9 @@ Rectangle {
 
     Component.onCompleted: {
         // Initialize settings from ini file
-        stillControls.flashMode = settings.flashMode
-        stillControls.whiteBalance = settings.whiteBalanceMode
-        stillControls.exposureCompensation = settings.exposureCompensation
+        captureControls.flashMode = settings.flashMode
+        captureControls.whiteBalance = settings.whiteBalanceMode
+        captureControls.exposureCompensation = settings.exposureCompensation
     }
 
     onStateChanged: {
@@ -195,9 +195,9 @@ Rectangle {
 
 
     // Bind setting controls to settings object
-    Binding { target: settings; property: "flashMode"; value: stillControls.flashMode; when: cameraUI.state != "Standby" }
-    Binding { target: settings; property: "whiteBalanceMode"; value: stillControls.whiteBalance; when: cameraUI.state != "Standby" }
-    Binding { target: settings; property: "exposureCompensation"; value: stillControls.exposureCompensation; when: cameraUI.state != "Standby" }
+    Binding { target: settings; property: "flashMode"; value: captureControls.flashMode; when: cameraUI.state != "Standby" }
+    Binding { target: settings; property: "whiteBalanceMode"; value: captureControls.whiteBalance; when: cameraUI.state != "Standby" }
+    Binding { target: settings; property: "exposureCompensation"; value: captureControls.exposureCompensation; when: cameraUI.state != "Standby" }
 
     CameraSettings {
         id: settings
@@ -222,9 +222,9 @@ Rectangle {
         previewResolution : camera.width + "x" + camera.height
         viewfinderResolution: settings.viewfinderResolution
 
-        flashMode: stillControls.flashMode
-        whiteBalanceMode: stillControls.whiteBalance
-        exposureCompensation: stillControls.exposureCompensation
+        flashMode: captureControls.flashMode
+        whiteBalanceMode: captureControls.whiteBalance
+        exposureCompensation: captureControls.exposureCompensation
 
         onImageCaptured : {
             photoPreview.source = preview
@@ -305,14 +305,14 @@ Rectangle {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        width: stillControls.visible ? parent.width - stillControls.settingsPaneWidth : parent.width
+        width: captureControls.visible ? parent.width - captureControls.settingsPaneWidth : parent.width
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         text: parent.state == "Standby" ? "Standby" : "Lens cover closed"
     }
 
     CaptureControls {
-        id: stillControls
+        id: captureControls
         anchors.top: topPane.bottom
         anchors.bottom: bottomPane.top
         anchors.left: parent.left

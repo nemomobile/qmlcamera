@@ -46,7 +46,7 @@ FocusScope {
     id : captureControls
 
     property QtObject camera
-    property alias settingsPaneWidth : buttonsColumn.width
+    property alias settingsPaneWidth : captureButtonsColumn.width
 
     property alias whiteBalance : wbModesButton.value
     property alias flashMode : flashModesButton.value
@@ -55,16 +55,16 @@ FocusScope {
     signal previewSelected
 
     Column {
-        id: buttonsColumn
+        id: captureButtonsColumn
         spacing : 4
         anchors.right : parent.right
         anchors.rightMargin: 8
         anchors.top : parent.top
-        anchors.topMargin: 32
+        anchors.topMargin: 48
 
         ImageButton {
-            width : 30
-            height: 30
+            width : 48
+            height: 48
             anchors.horizontalCenter: parent.horizontalCenter
             source: "images/icon-m-toolbar-camera.svg"
             onClicked: camera.captureImage()
@@ -72,8 +72,8 @@ FocusScope {
         }
 
         ImageButton {
-            width : 30
-            height: 30
+            width : 48
+            height: 48
             anchors.horizontalCenter: parent.horizontalCenter
             source: "images/icon-m-camera-video-record.svg"
             visible: camera.cameraMode == MeegoCamera.CaptureVideo && (camera.recordingState == MeegoCamera.Stopped || camera.recordingState == MeegoCamera.Paused)
@@ -81,8 +81,8 @@ FocusScope {
         }
 
         ImageButton {
-            width : 30
-            height: 30
+            width : 48
+            height: 48
             anchors.horizontalCenter: parent.horizontalCenter
             source: "images/icon-m-camera-pause.svg"
             visible: camera.cameraMode == MeegoCamera.CaptureVideo && camera.recordingState == MeegoCamera.Recording
@@ -94,6 +94,15 @@ FocusScope {
 //            visible: camera.cameraMode == MeegoCamera.CaptureVideo && camera.recordingState != MeegoCamera.Stopped
 //            onClicked: camera.stopRecording()
 //        }
+    }
+
+    Column {
+        id: settingButtonsColumn
+        spacing : 0
+        anchors.right : parent.right
+        anchors.rightMargin: 8
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 30
 
         CameraPropertyButton {
             id : flashModesButton

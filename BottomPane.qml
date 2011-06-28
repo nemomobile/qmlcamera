@@ -1,4 +1,5 @@
 import Qt 4.7
+import QtMultimediaKit 1.1
 import com.meego.MeegoHandsetCamera 1.0
 
 Item {
@@ -9,52 +10,41 @@ Item {
 
     signal previewSelected
 
-    CameraButton {
+    ImageButton {
         id: viewButton
+
+        source: "images/icon-m-toolbar-gallery.svg"
 
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.left: parent.left
 
-        text: "View"
+        width: viewButton.height
 
         onClicked: previewSelected()
 
         visible: camera.cameraMode == MeegoCamera.CaptureStillImage && previewAvailable
     }
 
-
-    CameraButton {
+    ImageButton {
         id: modeButton
 
-        anchors.top : parent.top
+        source: camera.cameraMode == MeegoCamera.CaptureVideo ? "images/icon-m-toolbar-camera.svg" : "images/icon-m-camera-video.svg"
+
+        anchors.top: parent.top
         anchors.bottom: parent.bottom
-        anchors.right : parent.right
+        anchors.right: parent.right
 
-        visible: videoModeEnabled
-
-        state: camera.cameraMode == MeegoCamera.CaptureStillImage ? "stillCapture" : "videoCapture"
-
-        states: [
-            State {
-                name: "stillCapture"
-                PropertyChanges { target: modeButton; text: "Still" }
-            },
-            State {
-                name: "videoCapture"
-                PropertyChanges { target: modeButton; text: "Video" }
-            }
-        ]
+        width: modeButton.height
 
         onClicked: {
-            if( camera.cameraMode == MeegoCamera.CaptureStillImage ) {
-                camera.cameraMode = MeegoCamera.CaptureVideo;
-            } else {
+            if( camera.cameraMode != MeegoCamera.CaptureStillImage ) {
                 camera.cameraMode = MeegoCamera.CaptureStillImage;
+            } else {
+                camera.cameraMode = MeegoCamera.CaptureVideo;
             }
         }
+
+        visible: videoModeEnabled
     }
-
-
-
 }
