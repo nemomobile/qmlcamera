@@ -31,9 +31,9 @@ int QmlCameraSettings::flashMode() const
     return value(FLASH_MODE_KEY, QVariant(QDeclarativeCamera::FlashAuto)).toInt();
 }
 
-int QmlCameraSettings::exposureCompensation() const
+qreal QmlCameraSettings::exposureCompensation() const
 {
-    return value(EXPOSURE_COMPENSATION_KEY, QVariant(0)).toInt();
+    return value(EXPOSURE_COMPENSATION_KEY, QVariant(0.0)).toReal();
 }
 
 QVariant QmlCameraSettings::captureResolution() const
@@ -68,7 +68,7 @@ void QmlCameraSettings::setFlashMode(int flash)
     emit flashModeChanged(flash);
 }
 
-void QmlCameraSettings::setExposureCompensation(int exposure)
+void QmlCameraSettings::setExposureCompensation(qreal exposure)
 {
     setValue(EXPOSURE_COMPENSATION_KEY, exposure);
     emit exposureCompensationChanged(exposure);

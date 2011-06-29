@@ -138,13 +138,6 @@ Rectangle {
         }
     }
 
-    Component.onCompleted: {
-        // Initialize settings from ini file
-        captureControls.flashMode = settings.flashMode
-        captureControls.whiteBalance = settings.whiteBalanceMode
-        captureControls.exposureCompensation = settings.exposureCompensation
-    }
-
     onStateChanged: {
         //console.log("meego-handset-camera: onStateChanged = " + state)
         if(state == "Standby") {
@@ -193,12 +186,6 @@ Rectangle {
         toggleStandby(!active)
     }
 
-
-    // Bind setting controls to settings object
-    Binding { target: settings; property: "flashMode"; value: captureControls.flashMode; when: cameraUI.state != "Standby" }
-    Binding { target: settings; property: "whiteBalanceMode"; value: captureControls.whiteBalance; when: cameraUI.state != "Standby" }
-    Binding { target: settings; property: "exposureCompensation"; value: captureControls.exposureCompensation; when: cameraUI.state != "Standby" }
-
     CameraSettings {
         id: settings
     }
@@ -222,9 +209,9 @@ Rectangle {
         previewResolution : camera.width + "x" + camera.height
         viewfinderResolution: settings.viewfinderResolution
 
-        flashMode: captureControls.flashMode
-        whiteBalanceMode: captureControls.whiteBalance
-        exposureCompensation: captureControls.exposureCompensation
+        flashMode: settings.flashMode
+        whiteBalanceMode: settings.whiteBalanceMode
+        exposureCompensation: settings.exposureCompensation
 
         onImageCaptured : {
             photoPreview.source = preview
@@ -320,6 +307,31 @@ Rectangle {
         camera: camera
     }
 
+    CameraPropertyPopup {
+        id: cameraPropertyPopup
+
+        height: 48
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: topPane.bottom
+        anchors.topMargin: 6
+        anchors.rightMargin: captureControls.settingsPaneWidth
+        anchors.leftMargin: captureControls.settingsPaneWidth
+
+        visible: opacity > 0
+        opacity: 0
+
+        model: CameraPropertyModel {}
+
+        transitions: Transition {
+            NumberAnimation { properties: "opacity"; duration: 100 }
+        }
+
+        onSelected: {
+            opacity = 0.0
+        }
+    }
+
     PhotoPreview {
         id : photoPreview
         anchors.fill : parent
@@ -344,6 +356,12 @@ Rectangle {
 
         anchors.margins: 6
         height: 48
+
+        camera: camera
+        settings: settings
+        propertyPopup: cameraPropertyPopup
+
+        quickSettingsVisible : cameraUI.state == "PhotoCapture"
 
         onHomePressed: mainWindow.showMinimized()
         onQuitPressed: Qt.quit()

@@ -45,31 +45,36 @@ Item {
     property alias value : flickableList.value
     signal clicked
 
-    width : 100
-    height: 70
+//    width : 100
+//    height: 70
 
 
     Text {
+
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+
         text: "Ev:"
-        x: 8
-        y: 8
-        font.pixelSize: 18
+        font.pixelSize: parent.height / 3
         color: "white"
     }
 
     FlickableList {
-	anchors.fill: parent
+        anchors.fill: parent
         id: flickableList
-        property real value : 0.0
+        property real value: 0.0
         items: ["-2", "-1.5", "-1", "-0.5", "0", "+0.5", "+1", "+1.5", "+2"]
         index: 4
 
         onIndexChanged: {
             value = items[index]
+            console.log("onIndexChanged: index = " +  index + "  value = " + value)
         }
 
         onValueChanged: {
+            console.log("value = " + value)
             var newIndex = indexForValue(value)
+            console.log("new index = " + newIndex + "  old index = " + index)
             if( newIndex != index)
                 scrollTo(newIndex)
         }
@@ -89,7 +94,7 @@ Item {
         onClicked: exposureCompensation.clicked()
 
         delegate: Text {
-            font.pixelSize: 22
+            font.pixelSize: exposureCompensation.height / 3 + 4
             color: "white"
             styleColor: "black"
             width: flickableList.width
@@ -98,6 +103,7 @@ Item {
             verticalAlignment: Text.AlignVCenter
             text: flickableList.items[index]
         }
+
     }
 }
 

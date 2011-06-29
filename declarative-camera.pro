@@ -44,4 +44,6 @@ INSTALLS += target app_icon config_file
 
 OTHER_FILES += \
     TopPane.qml \
-    BottomPane.qml
+    BottomPane.qml \
+    QuickSettingsPane.qml \
+    CameraPropertyModel.qml

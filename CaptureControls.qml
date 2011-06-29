@@ -48,10 +48,6 @@ FocusScope {
     property QtObject camera
     property alias settingsPaneWidth : captureButtonsColumn.width
 
-    property alias whiteBalance : wbModesButton.value
-    property alias flashMode : flashModesButton.value
-    property alias exposureCompensation : exposureCompensationButton.value
-
     signal previewSelected
 
     Column {
@@ -87,97 +83,6 @@ FocusScope {
             source: "images/icon-m-camera-pause.svg"
             visible: camera.cameraMode == MeegoCamera.CaptureVideo && camera.recordingState == MeegoCamera.Recording
             onClicked: camera.pauseRecording()
-        }
-
-//        CameraButton {
-//            text: "Stop"
-//            visible: camera.cameraMode == MeegoCamera.CaptureVideo && camera.recordingState != MeegoCamera.Stopped
-//            onClicked: camera.stopRecording()
-//        }
-    }
-
-    Column {
-        id: settingButtonsColumn
-        spacing : 0
-        anchors.right : parent.right
-        anchors.rightMargin: 8
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 30
-
-        CameraPropertyButton {
-            id : flashModesButton
-            value: MeegoCamera.FlashOff
-            visible: camera.cameraMode == MeegoCamera.CaptureStillImage
-            model: ListModel {
-                ListElement {
-                    icon: "images/icon-m-camera-flash-auto-screen.svg"
-                    value: Camera.FlashAuto
-                    text: "Auto"
-                }
-                ListElement {
-                    icon: "images/icon-m-camera-flash-off-screen.svg"
-                    value: Camera.FlashOff
-                    text: "Off"
-                }
-                ListElement {
-                    icon: "images/icon-m-camera-flash-always-screen.svg"
-                    value: Camera.FlashOn
-                    text: "On"
-                }
-                ListElement {
-                    icon: "images/icon-m-camera-flash-red-eye-screen.svg"
-                    value: Camera.FlashRedEyeReduction
-                    text: "Red Eye Reduction"
-                }
-            }
-
-            onPopupVisibleChanged: {
-                if( popupVisible )
-                    wbModesButton.closePopup();
-            }
-
-        }
-
-        CameraPropertyButton {
-            id : wbModesButton
-            value: MeegoCamera.WhiteBalanceAuto
-            model: ListModel {
-                ListElement {
-                    icon: "images/icon-m-camera-whitebalance-auto-screen.svg"
-                    value: Camera.WhiteBalanceAuto
-                    text: "Auto"
-                }
-                ListElement {
-                    icon: "images/icon-m-camera-whitebalance-sunny-screen.svg"
-                    value: Camera.WhiteBalanceSunlight
-                    text: "Sunlight"
-                }
-                ListElement {
-                    icon: "images/icon-m-camera-whitebalance-cloudy-screen.svg"
-                    value: Camera.WhiteBalanceCloudy
-                    text: "Cloudy"
-                }
-                ListElement {
-                    icon: "images/icon-m-camera-whitebalance-tungsten-screen.svg"
-                    value: Camera.WhiteBalanceIncandescent
-                    text: "Incandescent"
-                }
-                ListElement {
-                    icon: "images/icon-m-camera-whitebalance-fluorescent-screen.svg"
-                    value: Camera.WhiteBalanceFluorescent
-                    text: "Fluorescent"
-                }
-            }
-
-            onPopupVisibleChanged: {
-                if( popupVisible )
-                    flashModesButton.closePopup();
-            }
-
-        }
-
-        ExposureCompensationButton {
-            id : exposureCompensationButton
         }
     }
 

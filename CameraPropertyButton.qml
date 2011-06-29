@@ -39,67 +39,70 @@
 ****************************************************************************/
 
 import Qt 4.7
-import QtMultimediaKit 1.1
+//import QtMultimediaKit 1.1
 
 Item {
     id: propertyButton
-    property alias value : popup.currentValue
-    property alias model : popup.model
-    property bool popupVisible : popup.state == "visible"
+    property CameraPropertyModel model
+//    property alias value : model.currentValue
+    property variant value : model.currentValue
+    property alias icon : button.source
+    //property alias model : popup.model
+//    property bool popupVisible : popup.state == "visible"
 
-    width : 100
-    height: 70
+    signal clicked
 
-    function closePopup() {
-        popup.state = "invisible"
-    }
+//    function closePopup() {
+//        popup.state = "invisible"
+//    }
 
     ImageButton {
+        id: button
+
         anchors.fill: parent
-        Image {
-            anchors.centerIn: parent
-            source: popup.currentItem.icon
-        }
 
-        onClicked: popup.toggle()
-    }
+//        source: popup.currentItem.icon
+//        source: model
+        imageWidth: parent.height * 2 / 3
+        imageHeight: parent.height * 2 / 3
 
-    CameraPropertyPopup {
-        id: popup
-        anchors.right: parent.left
-        anchors.rightMargin: 16
-        anchors.top: parent.top
-        state: "invisible"
-        visible: opacity > 0
+        onClicked: propertyButton.clicked()
+
+//    CameraPropertyPopup {
+//        id: popup
+//        anchors.left: parent.left
+//        anchors.top: parent.bottom
+//        anchors.topMargin: 6
+//        state: "invisible"
+//        visible: opacity > 0
 
 
-        states: [
-            State {
-                name: "invisible"
-                PropertyChanges { target: popup; opacity: 0 }
-                PropertyChanges { target: camera; focus: true }
-            },
+//        states: [
+//            State {
+//                name: "invisible"
+//                PropertyChanges { target: popup; opacity: 0 }
+//            },
 
-            State {
-                name: "visible"
-                PropertyChanges { target: popup; opacity: 1.0 }
-            }
-        ]
+//            State {
+//                name: "visible"
+//                PropertyChanges { target: popup; opacity: 1.0 }
+//            }
+//        ]
 
-        transitions: Transition {
-            NumberAnimation { properties: "opacity"; duration: 100 }
-        }
+//        transitions: Transition {
+//            NumberAnimation { properties: "opacity"; duration: 100 }
+//        }
 
-        function toggle() {
-            if (state == "visible")
-                state = "invisible";
-            else
-                state = "visible";
-        }
+//        function toggle() {
+//            if (state == "visible")
+//                state = "invisible";
+//            else
+//                state = "visible";
+//        }
 
-        onSelected: {
-            popup.state = "invisible"
-        }
+//        onSelected: {
+//            popup.state = "invisible"
+//        }
     }
 }
 

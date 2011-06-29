@@ -8,7 +8,7 @@ class QmlCameraSettings : public QSettings
     Q_OBJECT
     Q_PROPERTY(int whiteBalanceMode READ whiteBalanceMode WRITE setWhiteBalanceMode NOTIFY whiteBalanceModeChanged)
     Q_PROPERTY(int flashMode READ flashMode WRITE setFlashMode NOTIFY flashModeChanged)
-    Q_PROPERTY(int exposureCompensation READ exposureCompensation WRITE setExposureCompensation NOTIFY exposureCompensationChanged)
+    Q_PROPERTY(qreal exposureCompensation READ exposureCompensation WRITE setExposureCompensation NOTIFY exposureCompensationChanged)
     Q_PROPERTY(QVariant captureResolution READ captureResolution WRITE setCaptureResolution NOTIFY captureResolutionChanged)
     Q_PROPERTY(QVariant videoCaptureResolution READ videoCaptureResolution WRITE setVideoCaptureResolution NOTIFY videoCaptureResolutionChanged)
     Q_PROPERTY(QVariant viewfinderResolution READ viewfinderResolution WRITE setViewfinderResolution NOTIFY viewfinderResolutionChanged)
@@ -18,7 +18,7 @@ public:
 
     int whiteBalanceMode() const;
     int flashMode() const;
-    int exposureCompensation() const;
+    qreal exposureCompensation() const;
     QVariant captureResolution() const;
     QVariant videoCaptureResolution() const;
     QVariant viewfinderResolution() const;
@@ -28,7 +28,7 @@ signals:
 
     void whiteBalanceModeChanged(int);
     void flashModeChanged(int);
-    void exposureCompensationChanged(int);
+    void exposureCompensationChanged(qreal);
     void captureResolutionChanged(QVariant);
     void videoCaptureResolutionChanged(QVariant);
     void viewfinderResolutionChanged(QVariant);
@@ -37,7 +37,7 @@ public slots:
 
     void setWhiteBalanceMode(int);
     void setFlashMode(int);
-    void setExposureCompensation(int);
+    void setExposureCompensation(qreal);
     void setCaptureResolution(QVariant);
     void setVideoCaptureResolution(QVariant);
     void setViewfinderResolution(QVariant);

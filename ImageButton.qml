@@ -3,6 +3,8 @@ import Qt 4.7
 Item {
     id: button
     property alias source : image.source
+    property alias imageWidth : image.width
+    property alias imageHeight: image.height
 
     signal clicked
 
@@ -13,7 +15,10 @@ Item {
 
     Image {
         id: image
-        anchors.fill: parent
+
+        width: parent.width
+        height: parent.height
+        anchors.centerIn: parent
         fillMode: Image.PreserveAspectFit
         smooth: true
     }
