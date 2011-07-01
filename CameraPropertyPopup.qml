@@ -43,17 +43,7 @@ import Qt 4.7
 Rectangle {
     id: propertyPopup
 
-    //property alias model : view.model
     property CameraPropertyModel model
-    //property variant currentValue
-    //property variant currentItem : model.get(view.currentIndex)
-
-    property int itemWidth : 100
-    property int itemHeight : 70
-    property int columns : 2
-
-    //width: columns*itemWidth + view.anchors.margins*2
-    //height: Math.ceil(model.count/columns)*itemHeight + view.anchors.margins*2 + 25
 
     radius: 5
     border.color: "#000000"
@@ -77,41 +67,42 @@ Rectangle {
         anchors.topMargin: 6
         anchors.leftMargin: 6
         anchors.rightMargin: 6
-        anchors.bottomMargin: 32
+        anchors.bottomMargin: parent.height / 3
 
-//        cellWidth: propertyPopup.itemWidth
-//        cellHeight: propertyPopup.itemHeight
-        cellWidth: view.width / view.model.count
+        cellWidth: view.width / view.model.count + 1
         cellHeight: view.height
+
         snapMode: ListView.SnapOneItem
         boundsBehavior: Flickable.StopAtBounds
+        flow: GridView.TopToBottom
+
         highlightFollowsCurrentItem: true
         highlight: Rectangle { color: "gray"; radius: 5 }
 
-        //currentIndex: indexForValue(propertyPopup.currentValue)
-
-
-        delegate: Item {
-            width: view.width / view.model.count
+        delegate: ImageButton {
+            id: delegateButton
+            width: view.width / view.model.count + 1
             height: view.height
+//            imageWidth: width - 12
+//            imageHeight: height - 12
+            imageMargins: 6
 
-            Image {
-                anchors.centerIn: parent
-                source: icon
-            }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    propertyPopup.model.currentValue = value
-                    propertyPopup.selected()
-                }
+            source: icon
+
+            onClicked: {
+                propertyPopup.model.currentValue = value
+                propertyPopup.selected()
             }
         }
+
     }
 
     Text {
+        id: text
+        anchors.top: view.bottom
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 8
+        anchors.topMargin: 6
+        anchors.bottomMargin: 6
         anchors.left: parent.left
         anchors.leftMargin: 16
 
@@ -119,8 +110,8 @@ Rectangle {
         font.bold: true
         style: Text.Raised;
         styleColor: "black"
-        font.pixelSize: 14
+        font.pixelSize: text.height
 
-        text: view.model.get(view.currentIndex).text
+        text: view.model.count > 0 ? view.model.get(view.currentIndex).text : ""
     }
 }

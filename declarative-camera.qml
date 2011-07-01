@@ -310,7 +310,7 @@ Rectangle {
     CameraPropertyPopup {
         id: cameraPropertyPopup
 
-        height: 48
+        height: 96
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: topPane.bottom
@@ -321,7 +321,10 @@ Rectangle {
         visible: opacity > 0
         opacity: 0
 
-        model: CameraPropertyModel {}
+        // Initialize with empty model
+        model: CameraPropertyModel {
+            ListModel {}
+        }
 
         transitions: Transition {
             NumberAnimation { properties: "opacity"; duration: 100 }

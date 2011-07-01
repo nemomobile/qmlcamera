@@ -40,7 +40,6 @@ Item {
 
             icon: flashModesButtonListModel.get(flashModesButtonModel.currentIndex()).icon
 
-            //value: settings.flashMode
             visible: camera.cameraMode == MeegoCamera.CaptureStillImage
 
             model: CameraPropertyModel {
@@ -73,10 +72,6 @@ Item {
                     }
                 }
 
-//            onPopupVisibleChanged: {
-//                if( popupVisible )
-//                    wbModesButton.closePopup();
-//            }
             }
             onClicked: propertyPopup.toggleOn(flashModesButton.model)
 
@@ -90,7 +85,6 @@ Item {
 
             icon: wbModesButtonListModel.get(wbModesButtonModel.currentIndex()).icon
 
-            //value: settings.whiteBalanceMode
             model: CameraPropertyModel {
                 id: wbModesButtonModel
 
@@ -127,11 +121,6 @@ Item {
                 }
             }
 
-//            onPopupVisibleChanged: {
-//                if( popupVisible )
-//                    flashModesButton.closePopup();
-//            }
-
             onClicked: propertyPopup.toggleOn(wbModesButton.model)
 
         }
@@ -139,10 +128,15 @@ Item {
         CameraPropertyButton {
             id : exposureCompensationButton
 
-            width: parent.height + parent.height * 2 / 3
+            width: parent.height * 2
             height: parent.height
 
+//            imageWidth: width
+//            imageHeight: height
+            imageMargins: 0
+
             icon: exposureCompensationButtonListModel.get(exposureCompensationButtonModel.currentIndex()).icon
+            text: "Ev:"
 
             model: CameraPropertyModel {
                 id: exposureCompensationButtonModel
@@ -209,25 +203,8 @@ Item {
                 }
             }
 
-//            onPopupVisibleChanged: {
-//                if( popupVisible )
-//                    flashModesButton.closePopup();
-//            }
-
             onClicked: propertyPopup.toggleOn(exposureCompensationButton.model)
         }
-
-//        ExposureCompensationButton {
-//            id : exposureCompensationButton
-
-//            width: parent.height * 2
-//            height: parent.height
-
-//            value: settings.exposureCompensation
-//        }
     }
-
-
-
 
 }

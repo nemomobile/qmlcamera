@@ -44,65 +44,23 @@ import Qt 4.7
 Item {
     id: propertyButton
     property CameraPropertyModel model
-//    property alias value : model.currentValue
     property variant value : model.currentValue
     property alias icon : button.source
-    //property alias model : popup.model
-//    property bool popupVisible : popup.state == "visible"
+//    property alias imageWidth: button.imageWidth
+//    property alias imageHeight : button.imageHeight
+    property alias imageMargins: button.imageMargins
+    property alias text: button.text
 
     signal clicked
-
-//    function closePopup() {
-//        popup.state = "invisible"
-//    }
 
     ImageButton {
         id: button
 
         anchors.fill: parent
 
-//        source: popup.currentItem.icon
-//        source: model
-        imageWidth: parent.height * 2 / 3
-        imageHeight: parent.height * 2 / 3
+        imageMargins: parent.height / 6
 
         onClicked: propertyButton.clicked()
-
-//    CameraPropertyPopup {
-//        id: popup
-//        anchors.left: parent.left
-//        anchors.top: parent.bottom
-//        anchors.topMargin: 6
-//        state: "invisible"
-//        visible: opacity > 0
-
-
-//        states: [
-//            State {
-//                name: "invisible"
-//                PropertyChanges { target: popup; opacity: 0 }
-//            },
-
-//            State {
-//                name: "visible"
-//                PropertyChanges { target: popup; opacity: 1.0 }
-//            }
-//        ]
-
-//        transitions: Transition {
-//            NumberAnimation { properties: "opacity"; duration: 100 }
-//        }
-
-//        function toggle() {
-//            if (state == "visible")
-//                state = "invisible";
-//            else
-//                state = "visible";
-//        }
-
-//        onSelected: {
-//            popup.state = "invisible"
-//        }
     }
 }
 
