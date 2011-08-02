@@ -39,17 +39,18 @@
 ****************************************************************************/
 
 import Qt 4.7
-//import QtMultimediaKit 1.1
 
 Item {
     id: propertyButton
     property CameraPropertyModel model
     property variant value : model.currentValue
     property alias icon : button.source
-//    property alias imageWidth: button.imageWidth
-//    property alias imageHeight : button.imageHeight
     property alias imageMargins: button.imageMargins
+    property alias imageCrop : button.imageCrop
     property alias text: button.text
+    property alias hMargin : button.hMargin
+    property alias vMargin : button.vMargin
+    property alias fontSize: button.fontSize
 
     signal clicked
 

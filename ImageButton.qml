@@ -4,10 +4,11 @@ Item {
     id: button
 
     property alias source : image.source
-//    property alias imageWidth : image.width
-//    property alias imageHeight: image.height
-//    property alias imageMargins: image.anchors.margins
+
     property int imageMargins: 0
+    property real imageCrop : 0.0
+    property int hMargin : 0
+    property int vMargin : 0
 
     property alias text: text.text
     property alias textColor: text.color
@@ -20,34 +21,45 @@ Item {
         onClicked: button.clicked()
     }
 
-    Text {
-        id: text
+    Item {
 
-        anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.fill: parent
+        anchors.leftMargin: hMargin
+        anchors.rightMargin: hMargin
+        anchors.topMargin: vMargin
+        anchors.bottomMargin: vMargin
 
-        color: "white"
-        font.pixelSize: parent.height * 2 / 3
+        Text {
+            id: text
 
-        visible: text != ""
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+
+            color: "white"
+            font.pixelSize: parent.height - imageMargins * 2
+
+            visible: text != ""
+        }
+
+        Image {
+            id: image
+
+            property int origWidth : text.visible ? parent.width - text.width - imageMargins * 2 : parent.width - imageMargins * 2
+            property int origHeight : parent.height - imageMargins * 2
+
+            property int xCrop : imageCrop * origWidth / 2
+            property int yCrop : imageCrop * origHeight / 2
+
+            x: text.visible ? text.x + text.width - xCrop : parent.x + xCrop
+
+            width: origWidth + 2 * xCrop
+            height: origHeight + 2 * yCrop
+
+            anchors.verticalCenter: parent.verticalCenter
+            fillMode: Image.PreserveAspectFit
+            smooth: true
+        }
     }
 
-    Image {
-        id: image
-
-        width: text.visible ? parent.width - text.width : parent.width
-        height: text.visible ? parent.height - text.height : parent.height
-
-        anchors.left: text.visible ? text.right : parent.left
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.margins: imageMargins
-
-        //anchors.verticalCenter: parent.verticalCenter
-        //anchors.horizontalCenterOffset: text.visible ? parent.width / 2 + text.width / 2 : parent.horizontalCenter
-        fillMode: Image.PreserveAspectFit
-        smooth: true
-    }
 
 }

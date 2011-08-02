@@ -37,6 +37,7 @@ Item {
 
             width: parent.height + parent.height * 2 / 3
             height: parent.height
+            hMargin: parent.height / 3
 
             icon: flashModesButtonListModel.get(flashModesButtonModel.currentIndex()).icon
 
@@ -82,6 +83,7 @@ Item {
 
             width: parent.height + parent.height * 2 / 3
             height: parent.height
+            hMargin: parent.height / 3
 
             icon: wbModesButtonListModel.get(wbModesButtonModel.currentIndex()).icon
 
@@ -128,12 +130,12 @@ Item {
         CameraPropertyButton {
             id : exposureCompensationButton
 
-            width: parent.height * 2
+            width: parent.height * 2 + parent.height * 3 / 4
             height: parent.height
-
-//            imageWidth: width
-//            imageHeight: height
+            hMargin: parent.height / 3
+            fontSize: parent.height * 2 / 3
             imageMargins: 0
+            imageCrop: 0.0
 
             icon: exposureCompensationButtonListModel.get(exposureCompensationButtonModel.currentIndex()).icon
             text: "Ev:"
