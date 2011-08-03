@@ -35,7 +35,6 @@ Item {
 
         anchors.leftMargin: 64
         anchors.rightMargin: 6
-        //anchors.bottomMargin: parent.height / 3
 
         camera: parent.camera
         settings: parent.settings
