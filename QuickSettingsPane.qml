@@ -133,9 +133,8 @@ Item {
             width: parent.height * 2 + parent.height * 3 / 4
             height: parent.height
             hMargin: parent.height / 3
-            fontSize: parent.height * 2 / 3
+            fontSize: 0.66
             imageMargins: 0
-            imageCrop: 0.0
 
             icon: exposureCompensationButtonListModel.get(exposureCompensationButtonModel.currentIndex()).icon
             text: "Ev:"

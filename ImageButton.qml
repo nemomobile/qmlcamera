@@ -6,22 +6,27 @@ Item {
     property alias source : image.source
 
     property int imageMargins: 0
-    property real imageCrop : 0.0
+    property real imageHorizontalAlignment : 0.0
     property int hMargin : 0
     property int vMargin : 0
 
     property alias text: text.text
     property alias textColor: text.color
-    property alias fontSize: text.font.pixelSize
+    property real fontSize: 1.0
 
     signal clicked
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
         onClicked: button.clicked()
+
+        onPressed: console.log("pressed");
+
     }
 
     Item {
+        id: buttonItem
 
         anchors.fill: parent
         anchors.leftMargin: hMargin
@@ -36,7 +41,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
 
             color: "white"
-            font.pixelSize: parent.height - imageMargins * 2
+            font.pixelSize: (parent.height - imageMargins * 2) * fontSize
 
             visible: text != ""
         }
@@ -44,16 +49,10 @@ Item {
         Image {
             id: image
 
-            property int origWidth : text.visible ? parent.width - text.width - imageMargins * 2 : parent.width - imageMargins * 2
-            property int origHeight : parent.height - imageMargins * 2
+            x: text.visible ? text.x + text.width + imageHorizontalAlignment * width : parent.x + imageHorizontalAlignment * width
 
-            property int xCrop : imageCrop * origWidth / 2
-            property int yCrop : imageCrop * origHeight / 2
-
-            x: text.visible ? text.x + text.width - xCrop : parent.x + xCrop
-
-            width: origWidth + 2 * xCrop
-            height: origHeight + 2 * yCrop
+            width: text.visible ? parent.width - text.width - imageMargins * 2 : parent.width - imageMargins * 2
+            height: parent.height - imageMargins * 2
 
             anchors.verticalCenter: parent.verticalCenter
             fillMode: Image.PreserveAspectFit

@@ -46,7 +46,7 @@ Item {
     property variant value : model.currentValue
     property alias icon : button.source
     property alias imageMargins: button.imageMargins
-    property alias imageCrop : button.imageCrop
+    property alias imageHorizontalAlignment : button.imageHorizontalAlignment
     property alias text: button.text
     property alias hMargin : button.hMargin
     property alias vMargin : button.vMargin
