@@ -60,5 +60,26 @@ Rectangle {
             parent.closed();
         }
     }
+
+    ImageButton {
+        id: deleteImageButton
+
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.bottomMargin: 0
+        anchors.leftMargin: 0
+	hMargin: 16
+	vMargin: 16
+        width: 80
+        height: 80
+
+        source: "images/icon-m-toolbar-delete.svg"
+
+        onClicked: {
+            changeState("PhotoCapture")
+            deleteImage()
+        }
+    }
+
 }
 

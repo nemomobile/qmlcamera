@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <QtDeclarative/QDeclarativeView>
 #include <policy/resource-set.h>
+#include "qmlcamerasettings.h"
 
 
 #define SERVER_NAME "/tmp/meegocamera"
@@ -41,6 +42,7 @@ private slots:
     void didReceiveKeyEventFromFile(int);
     void newConnection();
     void disconnected();
+    void deleteImage();
 
 private:
     void HandleGpioKeyEvent(struct input_event &ev);

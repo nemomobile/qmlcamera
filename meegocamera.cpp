@@ -8,8 +8,6 @@
 #include <sys/stat.h>
 #include <QFile>
 
-
-
 #include <QtGui/QApplication>
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/QDeclarativeEngine>
@@ -25,8 +23,13 @@
 #include "qmlcamerasettings.h"
 
 
-#define GPIO_KEYS "/dev/input/gpio-keys"
+#include <QFile>
 
+#define GPIO_KEYS "/dev/input/gpio-keys"
+#define QTM_NAMESPACE QtMobility
+#ifdef QTM_NAMESPACE
+   #define QTM_USE_NAMESPACE using namespace QTM_NAMESPACE;
+#endif
 
 MeegoCamera::MeegoCamera(bool visible): QObject(),
     m_uiVisible(visible),
@@ -155,7 +158,9 @@ void MeegoCamera::createCamera()
         m_view->setGeometry(QRect(0, 0, 800, 480));
         m_view->installEventFilter(this);
 
-        //qDebug() << Q_FUNC_INFO << "new UI ready";
+	QObject::connect(m_view->rootObject(), SIGNAL(deleteImage()), this, SLOT(deleteImage()));
+        
+	//qDebug() << Q_FUNC_INFO << "new UI ready";
     }
 }
 
@@ -339,3 +344,7 @@ bool MeegoCamera::getSwitchState(int fd, int key)
     return (keys[key/8] & (1 << (key % 8)));
 }
 
+void MeegoCamera::deleteImage()
+{
+    QFile::remove( m_view->rootObject()->property("imagePath").toString());
+}

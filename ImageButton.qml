@@ -20,9 +20,6 @@ Item {
         id: mouseArea
         anchors.fill: parent
         onClicked: button.clicked()
-
-        onPressed: console.log("pressed");
-
     }
 
     Item {

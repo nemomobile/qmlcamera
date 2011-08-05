@@ -47,6 +47,10 @@ Rectangle {
     color: "black"
     state: "Standby"
 
+    property alias imagePath : camera.capturedImagePath
+
+    signal deleteImage()
+
     // This defines "active" state. For example when state is
     // "PhotoCapture" active state is also "PhotoCapture" but
     // when state changes to "Standby" active state remains as
@@ -385,5 +389,9 @@ Rectangle {
         onPreviewSelected: changeState("PhotoPreview")
     }
 
+
+    onDeleteImage: {
+      bottomPane.previewAvailable = false
+    }
 
 }
