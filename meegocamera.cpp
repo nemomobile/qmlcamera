@@ -17,6 +17,12 @@
 #include <QDeclarativeContext>
 #include <QtOpenGL/QGLWidget>
 #include <QKeyEvent>
+#include <QDeclarativeEngine>
+#include <QFileInfo>
+
+#include "qdeclarativecamera_p.h"
+#include "qdeclarativecamerapreviewprovider_p.h"
+#include "qmlcamerasettings.h"
 
 
 #define GPIO_KEYS "/dev/input/gpio-keys"
@@ -24,6 +30,7 @@
 
 MeegoCamera::MeegoCamera(bool visible): QObject(),
     m_uiVisible(visible),
+    m_background(!visible),
     m_gpioFile(-1),
     m_gpioNotifier(0),
     m_server(0),
@@ -31,6 +38,9 @@ MeegoCamera::MeegoCamera(bool visible): QObject(),
     m_view(0)
 {
     //qDebug() << Q_FUNC_INFO;
+
+    qmlRegisterType<QDeclarativeCamera>("com.meego.MeegoHandsetCamera", 1, 0, "MeegoCamera");
+    qmlRegisterType<QmlCameraSettings>("com.meego.MeegoHandsetCamera", 1, 0, "CameraSettings");
 
     m_server = new QLocalServer(this);
 
@@ -67,7 +77,7 @@ MeegoCamera::MeegoCamera(bool visible): QObject(),
     m_coverState = !getSwitchState(m_gpioFile, 9);
 
     if (m_uiVisible)
-        showUI(true);
+        showUI();
 
     //qDebug() << Q_FUNC_INFO << "UI created  ";
 }
@@ -117,22 +127,30 @@ void MeegoCamera::createCamera()
 
         m_view = new QDeclarativeView;
 
-        connect(m_view, SIGNAL(destroyed(QObject*)), SLOT(viewDestroyed(QObject*)));
-
-        m_view->setAttribute(Qt::WA_DeleteOnClose, true);
         m_view->setViewport(new QGLWidget);
 
-        m_view->rootContext()->setContextProperty("settings", &m_settings);
+        m_view->engine()->addImageProvider("meegocamera", new QDeclarativeCameraPreviewProvider);
+
         m_view->rootContext()->setContextProperty("mainWindow", m_view);
 
         m_view->setSource(QUrl(mainQmlApp));
 
-        m_view->rootObject()->setProperty("lensCoverStatus",m_coverState);
+        m_view->rootObject()->setProperty("lensCoverStatus", m_coverState);
+
+        // Enable video capturing only if ti-dsp codecs are installed and running.
+        // Video recording does not work in current camera pipelinewithout them.
+        QFileInfo fi("/dev/DspBridge");
+        m_view->rootObject()->setProperty("videoModeEnabled", fi.exists());
 
         m_view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
         // Qt.quit() called in embedded .qml by default only emits
         // quit() signal, so do this (optionally use Qt.exit()).
-        QObject::connect(m_view->engine(), SIGNAL(quit()), this, SIGNAL(quit()));
+        // If application was started with background flag, then just hide UI.
+        if ( m_background )
+            QObject::connect(m_view->engine(), SIGNAL(quit()), this, SLOT(hideUI()));
+        else
+            QObject::connect(m_view->engine(), SIGNAL(quit()), this, SIGNAL(quit()));
+
         // QObject::connect(view.engine(), SIGNAL(()), qApp, SLOT(quit()));
         m_view->setGeometry(QRect(0, 0, 800, 480));
         m_view->installEventFilter(this);
@@ -178,77 +196,69 @@ void MeegoCamera::HandleGpioKeyEvent(struct input_event &ev)
         }
     } else if (ev.code == 212 && ev.value == 1 ) { // Camera button pressed
         // Check if UI is running and show it if not
-        showUI(true);
+        showUI();
     } else if ((ev.code == 9 && ev.value == 0) ) { // Lens cover opened
         //qDebug() << Q_FUNC_INFO << "lens cover opened ->";
         // Check if UI is running and show it if not
         m_coverState = true;
-        showUI(true);
+        showUI();
         m_view->rootObject()->setProperty("lensCoverStatus",true);
         //qDebug() << Q_FUNC_INFO << "lens cover opened <-";
     } else if (ev.code == 9 && ev.value == 1) { // Lens cover closed
         //qDebug() << Q_FUNC_INFO << "lens cover closed ->";
         m_coverState = false;
-        showUI(false);
+        hideUI();
         //qDebug() << Q_FUNC_INFO << "lens cover closed <-";
     }
 }
 
-void MeegoCamera::showUI(bool show)
+
+void MeegoCamera::hideUI()
 {
-    if (show) {
-        //qDebug() << Q_FUNC_INFO << "show ->";
-        m_volumeKeyResource->acquire();
-        createCamera();
+    //qDebug() << Q_FUNC_INFO << "->";
+    m_uiVisible = false;
 
-        //qDebug() << Q_FUNC_INFO << "show: camera created";
+    m_volumeKeyResource->release();
 
-        m_view->showFullScreen();
+    if (m_view) {
+        //qDebug() << Q_FUNC_INFO << "hide";
 
-        //qDebug() << Q_FUNC_INFO << "show: UI shown";
+        // LOL part starts here
 
-        m_view->rootObject()->setVisible(true);
+        // Viewfinder must be running when the view is deleted.
+        // Otherwise the viewfinder (xvoverlay) goes to
+        // inconsistent state when the view is created again.
+        m_view->rootObject()->setProperty("lensCoverStatus",true);
         m_view->rootObject()->setProperty("active",true);
-        m_uiVisible = true;
-        //qDebug() << Q_FUNC_INFO << "show <-";
-    } else {
-        //qDebug() << Q_FUNC_INFO << "hide ->";
-        m_volumeKeyResource->release();
-        if(m_view) {
-            //qDebug() << Q_FUNC_INFO << "hide";
 
-            // LOL part starts here
-
-            // We want no events from m_view after calling
-            // close(), that is why m_view is set to NULL
-            // before calling close().
-            // Events are ignore because viewfinder must be
-            // running when the view is closed.
-            // Otherwise the viewfinder (xvoverlay) goes to
-            // inconsistent state when the view is created again.
-            // Seting m_view as NULL also prevents quit() singnal
-            // to be emitted in viewDestroyed() method.
-            QDeclarativeView* view = m_view;
-            m_view = 0;
-
-            // Make sure that the view finder is running before
-            // closing the view.
-            view->rootObject()->setProperty("lensCoverStatus",true);
-            view->rootObject()->setProperty("active",true);
-
-            view->close();
-            //qDebug() << Q_FUNC_INFO << "hide: view closed";
-        }
-
-        m_uiVisible = false;
-        //qDebug() << Q_FUNC_INFO << "hide <-";
+        m_view->deleteLater();
+        m_view = 0;
     }
+    //qDebug() << Q_FUNC_INFO << "<-";
+}
+
+void MeegoCamera::showUI()
+{
+    //qDebug() << Q_FUNC_INFO << "show ->";
+    m_volumeKeyResource->acquire();
+    createCamera();
+
+    //qDebug() << Q_FUNC_INFO << "show: camera created";
+
+    m_view->showFullScreen();
+
+    //qDebug() << Q_FUNC_INFO << "show: UI shown";
+
+    m_view->rootObject()->setVisible(true);
+    m_view->rootObject()->setProperty("active",true);
+    m_uiVisible = true;
+    //qDebug() << Q_FUNC_INFO << "show <-";
 }
 
 void MeegoCamera::newConnection()
 {
     while (m_server->hasPendingConnections()) {
-        showUI(true);
+        showUI();
         QLocalSocket *socket = m_server->nextPendingConnection();
         connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
         m_connections.push_back(socket);
@@ -267,39 +277,45 @@ void MeegoCamera::disconnected()
     socket->deleteLater();
 }
 
-void MeegoCamera::viewDestroyed(QObject* object)
-{
-    //qDebug() << Q_FUNC_INFO;
-
-    // Let's emit quit() signal if the destroyed object is
-    // view. In case of lens cover close m_view is already
-    // set as NULL and therefore quit() is not emitted.
-    // The process must be kept running in background
-    // when lens cover is closed.
-    if(m_view == object) {
-        m_view = 0;
-        emit quit();
-    }
-}
-
 bool MeegoCamera::eventFilter(QObject* watched, QEvent* event)
 {
-    if( watched == m_view && event->type() == QEvent::ActivationChange && m_view->rootObject()) {
-        //qDebug() << Q_FUNC_INFO << "window active status changed as " << m_view->isActiveWindow();
+    //qDebug() << Q_FUNC_INFO << "event = " << event->type();
+    if( m_view && watched == m_view) {
 
-        m_view->rootObject()->setProperty("active",m_view->isActiveWindow());
+        if(event->type() == QEvent::ActivationChange && m_view->rootObject()) {
+            //qDebug() << Q_FUNC_INFO << "window active status changed as " << m_view->isActiveWindow();
 
-        // Acquire access to volume keys when the UI is active
-        // and release the keys when the UI is deactive i.e.
-        // minimized to task switcher.
-        if(m_view->isActiveWindow())
-            m_volumeKeyResource->acquire();
-        else
+            m_uiVisible = m_view->isActiveWindow();
+
+            m_view->rootObject()->setProperty("active",m_view->isActiveWindow());
+
+            // Acquire access to volume keys when the UI is active
+            // and release the keys when the UI is deactive i.e.
+            // minimized to task switcher.
+            if(m_view->isActiveWindow())
+                m_volumeKeyResource->acquire();
+            else
+                m_volumeKeyResource->release();
+        }
+
+        if(event->type() == QEvent::Close) {
+            //qDebug() << Q_FUNC_INFO << "window closed";
+
+            m_uiVisible = false;
+
             m_volumeKeyResource->release();
+
+            if ( !m_background ) {
+                emit quit();
+            } else {
+                hideUI();
+            }
+        }
     }
 
     return false;
 }
+
 
 void MeegoCamera::cleanSocket()
 {

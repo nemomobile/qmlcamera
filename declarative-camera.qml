@@ -40,6 +40,7 @@
 
 import Qt 4.7
 import QtMultimediaKit 1.1
+import com.meego.MeegoHandsetCamera 1.0
 
 Rectangle {
     id : cameraUI
@@ -65,12 +66,16 @@ Rectangle {
     // false = not active
     property bool active : false
 
+//    property alias videoModeEnabled: captureControls.videoModeEnabled
+    property alias videoModeEnabled: bottomPane.videoModeEnabled
+
     states: [
         State {
             name: "Standby"
             StateChangeScript {
                 script: {
-                    stillControls.visible = false
+                    captureControls.visible = false
+                    bottomPane.visible = false
                     photoPreview.visible = false
                     camera.visible = false
                 }
@@ -80,7 +85,8 @@ Rectangle {
             name: "PhotoCapture"
             StateChangeScript {
                 script: {
-                    stillControls.visible = true
+                    captureControls.visible = true
+                    bottomPane.visible = true
                     photoPreview.visible = false
                 }
             }
@@ -89,7 +95,8 @@ Rectangle {
             name: "PhotoPreview"
             StateChangeScript {
                 script: {
-                    stillControls.visible = false
+                    captureControls.visible = false
+                    bottomPane.visible = false
                     photoPreview.visible = true
                     photoPreview.focus = true
                     camera.visible = false
@@ -129,13 +136,6 @@ Rectangle {
             //console.log("meego-handset-camera: wake up from standby to state " + activeState)
             state = activeState
         }
-    }
-
-    Component.onCompleted: {
-        // Initialize settings from ini file
-        stillControls.flashMode = settings.flashMode
-        stillControls.whiteBalance = settings.whiteBalanceMode
-        stillControls.exposureCompensation = settings.exposureCompensation
     }
 
     onStateChanged: {
@@ -186,13 +186,11 @@ Rectangle {
         toggleStandby(!active)
     }
 
+    CameraSettings {
+        id: settings
+    }
 
-    // Bind setting controls to settings object
-    Binding { target: settings; property: "flashMode"; value: stillControls.flashMode; when: cameraUI.state != "Standby" }
-    Binding { target: settings; property: "whiteBalanceMode"; value: stillControls.whiteBalance; when: cameraUI.state != "Standby" }
-    Binding { target: settings; property: "exposureCompensation"; value: stillControls.exposureCompensation; when: cameraUI.state != "Standby" }
-
-    Camera {
+    MeegoCamera {
         id: camera
         objectName: "camera"
         x: 0
@@ -204,22 +202,25 @@ Rectangle {
         cameraState: "UnloadedState"
 
         captureResolution : settings.captureResolution
+        videoCaptureResolution: settings.videoCaptureResolution
+
+        videoEncodingQuality: settings.videoEncodingQuality
         
         previewResolution : camera.width + "x" + camera.height
         viewfinderResolution: settings.viewfinderResolution
 
-        flashMode: stillControls.flashMode
-        whiteBalanceMode: stillControls.whiteBalance
-        exposureCompensation: stillControls.exposureCompensation
+        flashMode: settings.flashMode
+        whiteBalanceMode: settings.whiteBalanceMode
+        exposureCompensation: settings.exposureCompensation
 
         onImageCaptured : {
             photoPreview.source = preview
-            stillControls.previewAvailable = true
+            bottomPane.previewAvailable = true
             changeState("PhotoPreview")
         }
 
         onCameraStateChanged : {
-            //console.log("meego-handset-camera: CAMERA STATE = " + cameraState)
+            console.log("meego-handset-camera: CAMERA STATE = " + cameraState)
             visible = true
         }
         
@@ -227,8 +228,18 @@ Rectangle {
             if (event.key == Qt.Key_Camera || event.key == Qt.Key_WebCam ) {
                 // Capture button fully pressed
                 event.accepted = true;
-                // Take still image
-                camera.captureImage();
+
+                if(camera.cameraMode == MeegoCamera.CaptureVideo) {
+                    if(camera.recordingState == MeegoCamera.Recording)
+                        //camera.pauseRecording();
+                        camera.stopRecording();
+                    else
+                        camera.record();
+                } else {
+                    // Take still image
+                    camera.captureImage();
+                }
+
             } else if (event.key == Qt.Key_ZoomIn || event.key == Qt.Key_F7  ) {
                 // Zoom in
                 event.accepted = true;
@@ -281,18 +292,47 @@ Rectangle {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        width: stillControls.visible ? parent.width - stillControls.settingsPaneWidth : parent.width
+        width: captureControls.visible ? parent.width - captureControls.settingsPaneWidth : parent.width
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         text: parent.state == "Standby" ? "Standby" : "Lens cover closed"
     }
 
     CaptureControls {
-        id: stillControls
-        anchors.fill: parent
+        id: captureControls
+        anchors.top: topPane.bottom
+        anchors.bottom: bottomPane.top
+        anchors.left: parent.left
+        anchors.right: parent.right
         camera: camera
-        onPreviewSelected: changeState("PhotoPreview")
-        //onPreviewSelected: mainWindow.showMinimized()
+    }
+
+    CameraPropertyPopup {
+        id: cameraPropertyPopup
+
+        height: 96
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: topPane.bottom
+        anchors.topMargin: 6
+        anchors.rightMargin: captureControls.settingsPaneWidth
+        anchors.leftMargin: captureControls.settingsPaneWidth
+
+        visible: opacity > 0
+        opacity: 0
+
+        // Initialize with empty model
+        model: CameraPropertyModel {
+            ListModel {}
+        }
+
+        transitions: Transition {
+            NumberAnimation { properties: "opacity"; duration: 100 }
+        }
+
+        onSelected: {
+            opacity = 0.0
+        }
     }
 
     PhotoPreview {
@@ -310,20 +350,40 @@ Rectangle {
         }
     }
 
-    ImageButton {
-        id: homeButton
+    TopPane {
+        id: topPane
 
-        anchors.top: parent.top
         anchors.left: parent.left
-        anchors.topMargin: 6
-        anchors.leftMargin: 6
+        anchors.right: parent.right
+        anchors.top: parent.top
 
-        width: 48
+        anchors.margins: 6
         height: 48
 
-        source: "images/icon-m-framework-home.svg"
+        camera: camera
+        settings: settings
+        propertyPopup: cameraPropertyPopup
 
-        onClicked: mainWindow.showMinimized()
+        quickSettingsVisible : cameraUI.state == "PhotoCapture"
+
+        onHomePressed: mainWindow.showMinimized()
+        onQuitPressed: Qt.quit()
     }
+
+    BottomPane {
+        id: bottomPane
+
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+
+        anchors.margins: 6
+        height: 48
+
+        camera: camera
+
+        onPreviewSelected: changeState("PhotoPreview")
+    }
+
 
 }

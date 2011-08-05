@@ -71,9 +71,9 @@ Item {
     Item {
         id : bar
         x : 16
-        y : parent.height/4
+        anchors.verticalCenter: parent.verticalCenter
         width : 24
-        height : parent.height/2
+        height : parent.height * 2 / 3
         opacity : 0
 
         Rectangle {

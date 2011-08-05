@@ -12,7 +12,6 @@
 #include <QtDeclarative/QDeclarativeView>
 #include <policy/resource-set.h>
 
-#include "qmlcamerasettings.h"
 
 #define SERVER_NAME "/tmp/meegocamera"
 
@@ -37,17 +36,18 @@ public:
     bool eventFilter(QObject* watched, QEvent* event);
 
 private slots:
+
+    void hideUI();
     void didReceiveKeyEventFromFile(int);
     void newConnection();
     void disconnected();
-    void viewDestroyed(QObject*);
 
 private:
     void HandleGpioKeyEvent(struct input_event &ev);
     void openHandles();
     void cleanSocket();
     void createCamera();
-    void showUI(bool show);
+    void showUI();
 
     // Returns state of given switch, for example lens cover
     // true = switch is on
@@ -56,13 +56,14 @@ private:
 
     bool m_uiVisible;
     bool m_coverState;
+    bool m_background;
     int m_gpioFile;
+
     QSocketNotifier *m_gpioNotifier;
     QLocalServer *m_server;
     QVector<QLocalSocket*> m_connections;
 
     QDeclarativeView *m_view;
-    QmlCameraSettings m_settings;
 
     ResourcePolicy::ResourceSet* m_volumeKeyResource;
 };

@@ -40,128 +40,50 @@
 
 import Qt 4.7
 import QtMultimediaKit 1.1
+import com.meego.MeegoHandsetCamera 1.0
 
 FocusScope {
     id : captureControls
 
-    property Camera camera
-    property bool previewAvailable : false
-    property alias settingsPaneWidth : buttonsColumn.width
-
-    property alias whiteBalance : wbModesButton.value
-    property alias flashMode : flashModesButton.value
-    property alias exposureCompensation : exposureCompensationButton.value
+    property QtObject camera
+    property alias settingsPaneWidth : captureButtonsColumn.width
 
     signal previewSelected
 
     Column {
-        id: buttonsColumn
-        spacing : 8
+        id: captureButtonsColumn
+        spacing : 4
         anchors.right : parent.right
         anchors.rightMargin: 8
         anchors.top : parent.top
-        anchors.topMargin: 8
+        anchors.topMargin: 48
 
-//        FocusButton {
-//            camera: captureControls.camera
-//        }
-
-        CameraButton {
-            text: "Capture"
+        ImageButton {
+            width : 48
+            height: 48
+            anchors.horizontalCenter: parent.horizontalCenter
+            source: "images/icon-m-toolbar-camera.svg"
             onClicked: camera.captureImage()
-            visible: camera.cameraState == Camera.ActiveState
+            visible: camera.cameraMode == MeegoCamera.CaptureStillImage && camera.cameraState == MeegoCamera.ActiveState
         }
 
-        CameraPropertyButton {
-            id : flashModesButton
-            value: Camera.FlashOff
-            model: ListModel {
-                ListElement {
-                    icon: "images/camera_flash_auto.png"
-                    value: Camera.FlashAuto
-                    text: "Auto"
-                }
-                ListElement {
-                    icon: "images/camera_flash_off.png"
-                    value: Camera.FlashOff
-                    text: "Off"
-                }
-                ListElement {
-                    icon: "images/camera_flash_fill.png"
-                    value: Camera.FlashOn
-                    text: "On"
-                }
-                ListElement {
-                    icon: "images/camera_flash_redeye.png"
-                    value: Camera.FlashRedEyeReduction
-                    text: "Red Eye Reduction"
-                }
-            }
-
-            onPopupVisibleChanged: {
-                if( popupVisible )
-                    wbModesButton.closePopup();
-            }
-
+        ImageButton {
+            width : 48
+            height: 48
+            anchors.horizontalCenter: parent.horizontalCenter
+            source: "images/icon-m-camera-video-record.svg"
+            visible: camera.cameraMode == MeegoCamera.CaptureVideo && (camera.recordingState == MeegoCamera.Stopped || camera.recordingState == MeegoCamera.Paused)
+            onClicked: camera.record()
         }
 
-        CameraPropertyButton {
-            id : wbModesButton
-            value: Camera.WhiteBalanceAuto
-            model: ListModel {
-                ListElement {
-                    icon: "images/camera_auto_mode.png"
-                    value: Camera.WhiteBalanceAuto
-                    text: "Auto"
-                }
-                ListElement {
-                    icon: "images/camera_white_balance_sunny.png"
-                    value: Camera.WhiteBalanceSunlight
-                    text: "Sunlight"
-                }
-                ListElement {
-                    icon: "images/camera_white_balance_cloudy.png"
-                    value: Camera.WhiteBalanceCloudy
-                    text: "Cloudy"
-                }
-                ListElement {
-                    icon: "images/camera_white_balance_incandescent.png"
-                    value: Camera.WhiteBalanceIncandescent
-                    text: "Incandescent"
-                }
-                ListElement {
-                    icon: "images/camera_white_balance_flourescent.png"
-                    value: Camera.WhiteBalanceFluorescent
-                    text: "Fluorescent"
-                }
-            }
-
-            onPopupVisibleChanged: {
-                if( popupVisible )
-                    flashModesButton.closePopup();
-            }
-
+        ImageButton {
+            width : 48
+            height: 48
+            anchors.horizontalCenter: parent.horizontalCenter
+            source: "images/icon-m-camera-pause.svg"
+            visible: camera.cameraMode == MeegoCamera.CaptureVideo && camera.recordingState == MeegoCamera.Recording
+            onClicked: camera.pauseRecording()
         }
-
-        ExposureCompensationButton {
-            id : exposureCompensationButton
-        }
-
-        CameraButton {
-            text: "View"
-            onClicked: captureControls.previewSelected()
-            visible: captureControls.previewAvailable
-        }
-    }
-
-    CameraButton {
-        id: quitButton
-        anchors.right : parent.right
-        anchors.rightMargin: 8
-        anchors.bottom : parent.bottom
-        anchors.bottomMargin: 8
-        text: "Quit"
-        onClicked: Qt.quit()
     }
 
     Item {
@@ -173,7 +95,7 @@ FocusScope {
         height: childrenRect.height
         width: childrenRect.width
 
-        visible : camera.lockStatus == Camera.Locked
+        visible : camera.lockStatus == MeegoCamera.Locked
 
         Rectangle {
             opacity: 0.4
@@ -221,7 +143,7 @@ FocusScope {
     }
 
     ZoomControl {
-        visible: camera.cameraState == Camera.ActiveState
+        visible: camera.cameraState == MeegoCamera.ActiveState
         x : 0
         y : 0
         width : 100

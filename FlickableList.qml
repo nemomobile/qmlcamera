@@ -53,16 +53,30 @@ Item {
     property int itemWidth : flickableList.width
 
     function scrollTo(id) {
-        var x = id*flickableList.itemWidth
-        if (flickArea.contentX != x || centeringAnimation.running) {
-            centeringAnimation.stop();
-            flickArea.newX = id*flickableList.itemWidth
-            centeringAnimation.start();
+        console.log("scrollTo: id = " + id + " item width = " + flickableList.itemWidth)
+
+        if(flickableList.itemWidth == 0) {
+            index = id
+        } else {
+            var x = id*flickableList.itemWidth
+            console.log("scrollTo: x = " + x)
+            if (flickArea.contentX != x || centeringAnimation.running) {
+                console.log("scrollTo: start scrolling")
+                centeringAnimation.stop();
+                flickArea.newX = id*flickableList.itemWidth
+                centeringAnimation.start();
+            }
         }
     }
 
-    onIndexChanged: scrollTo(index)
-    onWidthChanged: scrollTo(index)
+    onIndexChanged: {
+        console.log("onIndexChanged: index = " + index)
+        scrollTo(index)
+    }
+    onWidthChanged: {
+        console.log("onWidthChanged: width = " + width + "  index = " + index)
+        scrollTo(index)
+    }
 
     Flickable {
         id: flickArea
