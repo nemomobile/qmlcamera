@@ -41,6 +41,12 @@ private slots:
     void didReceiveKeyEventFromFile(int);
     void newConnection();
     void disconnected();
+    void deleteImage();
+
+    // Resource Policy Framework callbacks
+    void resourcesGranted(const QList<ResourcePolicy::ResourceType>& grantedOptionalResources);
+    void resourcesDenied();
+    void lostResources();
 
 private:
     void HandleGpioKeyEvent(struct input_event &ev);
@@ -48,6 +54,8 @@ private:
     void cleanSocket();
     void createCamera();
     void showUI();
+    bool isVideoCaptureSupported() const;
+    void updateResources();
 
     // Returns state of given switch, for example lens cover
     // true = switch is on
@@ -65,7 +73,9 @@ private:
 
     QDeclarativeView *m_view;
 
-    ResourcePolicy::ResourceSet* m_volumeKeyResource;
+    ResourcePolicy::ResourceSet* m_cameraForegroundResources;
+    ResourcePolicy::ResourceSet* m_cameraBackgroundResources;
+    bool m_resourcesGranted;
 };
 
 #endif // GpioKeysListener_H

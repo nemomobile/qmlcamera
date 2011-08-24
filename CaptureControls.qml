@@ -72,7 +72,9 @@ FocusScope {
             height: 48
             anchors.horizontalCenter: parent.horizontalCenter
             source: "images/icon-m-camera-video-record.svg"
-            visible: camera.cameraMode == MeegoCamera.CaptureVideo && (camera.recordingState == MeegoCamera.Stopped || camera.recordingState == MeegoCamera.Paused)
+            visible: camera.cameraMode == MeegoCamera.CaptureVideo &&
+                     camera.cameraState == MeegoCamera.ActiveState &&
+                     (camera.recordingState == MeegoCamera.Stopped || camera.recordingState == MeegoCamera.Paused)
             onClicked: camera.record()
         }
 

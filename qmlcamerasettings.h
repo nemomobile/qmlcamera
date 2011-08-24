@@ -13,6 +13,7 @@ class QmlCameraSettings : public QSettings
     Q_PROPERTY(QVariant videoCaptureResolution READ videoCaptureResolution WRITE setVideoCaptureResolution NOTIFY videoCaptureResolutionChanged)
     Q_PROPERTY(QVariant viewfinderResolution READ viewfinderResolution WRITE setViewfinderResolution NOTIFY viewfinderResolutionChanged)
     Q_PROPERTY(int videoEncodingQuality READ videoEncodingQuality WRITE setVideoEncodingQuality NOTIFY videoEncodingQualityChanged)
+    Q_PROPERTY(int cameraMode READ cameraMode WRITE setCameraMode NOTIFY cameraModeChanged )
 public:
     explicit QmlCameraSettings(QObject *parent = 0);
 
@@ -23,6 +24,7 @@ public:
     QVariant videoCaptureResolution() const;
     QVariant viewfinderResolution() const;
     int videoEncodingQuality() const;
+    int cameraMode() const;
 
 signals:
 
@@ -33,6 +35,8 @@ signals:
     void videoCaptureResolutionChanged(QVariant);
     void viewfinderResolutionChanged(QVariant);
     void videoEncodingQualityChanged(int);
+    void cameraModeChanged(int);
+
 public slots:
 
     void setWhiteBalanceMode(int);
@@ -42,6 +46,8 @@ public slots:
     void setVideoCaptureResolution(QVariant);
     void setViewfinderResolution(QVariant);
     void setVideoEncodingQuality(int);
+    void setCameraMode(int);
+
 };
 
 #endif // QMLCAMERASETTINGS_H

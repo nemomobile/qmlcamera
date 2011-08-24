@@ -5,6 +5,7 @@ import com.meego.MeegoHandsetCamera 1.0
 Item {
 
     property QtObject camera
+    property QtObject settings
     property bool videoModeEnabled: false
     property bool previewAvailable : false
 
@@ -38,11 +39,10 @@ Item {
         width: modeButton.height
 
         onClicked: {
-            if( camera.cameraMode != MeegoCamera.CaptureStillImage ) {
-                camera.cameraMode = MeegoCamera.CaptureStillImage;
-            } else {
-                camera.cameraMode = MeegoCamera.CaptureVideo;
-            }
+            if( camera.cameraMode != MeegoCamera.CaptureStillImage )
+                settings.cameraMode = MeegoCamera.CaptureStillImage
+            else
+                settings.cameraMode = MeegoCamera.CaptureVideo
         }
 
         visible: videoModeEnabled

@@ -15,6 +15,7 @@
 #define VIDEO_CAPTURE_RESOLUTION_KEY "video-capture-resolution"
 #define VIEWFINDER_RESOLUTION_KEY "viewfinder-resolution"
 #define VIDEO_ENCODING_QUALITY_KEY "video-encoding-quality"
+#define CAMERA_MODE_KEY "camera-mode"
 
 QmlCameraSettings::QmlCameraSettings(QObject *parent) :
     QSettings(parent)
@@ -54,6 +55,11 @@ QVariant QmlCameraSettings::viewfinderResolution() const
 int QmlCameraSettings::videoEncodingQuality() const
 {
     return value(VIDEO_ENCODING_QUALITY_KEY, QVariant(0)).toInt();
+}
+
+int QmlCameraSettings::cameraMode() const
+{
+    return value(CAMERA_MODE_KEY, QVariant(QDeclarativeCamera::CaptureStillImage)).toInt();
 }
 
 void QmlCameraSettings::setWhiteBalanceMode(int wb)
@@ -96,4 +102,10 @@ void QmlCameraSettings::setVideoEncodingQuality(int quality)
 {
     setValue(VIDEO_ENCODING_QUALITY_KEY, quality);
     emit videoEncodingQualityChanged(quality);
+}
+
+void QmlCameraSettings::setCameraMode(int mode)
+{
+    setValue(CAMERA_MODE_KEY, mode);
+    emit cameraModeChanged(mode);
 }

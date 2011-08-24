@@ -54,6 +54,9 @@
 #include <QDebug>
 
 
+#define CAMERA_ERR_MSG_RESOURCES_RESERVED "Resources reserved"
+
+
 QT_BEGIN_NAMESPACE
 
 class FocusZoneItem : public QGraphicsItem {
@@ -117,6 +120,11 @@ void QDeclarativeCamera::_q_error(int errorCode, const QString &errorString)
 {
     emit error(Error(errorCode), errorString);
     emit errorChanged();
+}
+
+void QDeclarativeCamera::_q_cameraError(QCamera::Error errorCode)
+{
+    _q_error(errorCode, m_camera->errorString());
 }
 
 void QDeclarativeCamera::_q_imageCaptured(int id, const QImage &preview)
@@ -223,6 +231,10 @@ void QDeclarativeCamera::_q_applyPendingState()
             _q_updateImageSettings();
 
         m_isStateSet = true;
+
+        // Always acquire resources when setting state for the first time
+        m_resourcesStatus = QDeclarativeCamera::ResourcesNotNeeded;
+
         setCameraState(m_pendingState);
     }
 }
@@ -269,11 +281,12 @@ QDeclarativeCamera::QDeclarativeCamera(QDeclarativeItem *parent) :
     QDeclarativeItem(parent),
     m_camera(0),
     m_viewfinderItem(0),
-    m_imageSettingsChanged(false),
     m_viewfinderFramerate(0),
+    m_imageSettingsChanged(false),
     m_pendingState(ActiveState),
     m_isStateSet(false),
-    m_isValid(true)
+    m_isValid(true),
+    m_resourcesStatus(QDeclarativeCamera::ResourcesNotNeeded)
 {
     m_videoSettings.setEncodingMode(QtMultimediaKit::ConstantQualityEncoding);
 
@@ -292,6 +305,15 @@ QDeclarativeCamera::QDeclarativeCamera(QDeclarativeItem *parent) :
     m_exposure = m_camera->exposure();
     m_focus = m_camera->focus();
 
+    m_cameraResources = new ResourcePolicy::ResourceSet("camera", this);
+    m_cameraResources->setAlwaysReply();
+
+    updateResources();
+
+    connect(m_cameraResources, SIGNAL(resourcesGranted(const QList<ResourcePolicy::ResourceType>)), this, SLOT(_q_resourcesGranted(QList<ResourcePolicy::ResourceType>)));
+    connect(m_cameraResources, SIGNAL(resourcesDenied()), this, SLOT(_q_resourcesDenied()));
+    connect(m_cameraResources, SIGNAL(lostResources()), this, SLOT(_q_lostResources()));
+
 
     connect(m_viewfinderItem, SIGNAL(nativeSizeChanged(QSizeF)),
             this, SLOT(_q_nativeSizeChanged(QSizeF)));
@@ -299,6 +321,7 @@ QDeclarativeCamera::QDeclarativeCamera(QDeclarativeItem *parent) :
     connect(m_camera, SIGNAL(lockStatusChanged(QCamera::LockStatus,QCamera::LockChangeReason)), this, SIGNAL(lockStatusChanged()));
     connect(m_camera, SIGNAL(stateChanged(QCamera::State)), this, SLOT(_q_updateState(QCamera::State)));
     connect(m_camera, SIGNAL(captureModeChanged(QCamera::CaptureMode)), this, SLOT(_q_updateMode(QCamera::CaptureMode)));
+    connect(m_camera, SIGNAL(error(QCamera::Error)), this, SLOT(_q_cameraError(QCamera::Error)));
 
     m_capture = new QCameraImageCapture(m_camera, this);
 
@@ -337,6 +360,8 @@ QDeclarativeCamera::QDeclarativeCamera(QDeclarativeItem *parent) :
 
 QDeclarativeCamera::~QDeclarativeCamera()
 {
+    m_cameraResources->release();
+
     if (m_isValid) {
         m_camera->unload();
 
@@ -360,6 +385,9 @@ QString QDeclarativeCamera::errorString() const
 {
     if (!m_isValid)
         return QString();
+
+    if(m_resourcesStatus == QDeclarativeCamera::ResourcesDenied)
+        return QString(CAMERA_ERR_MSG_RESOURCES_RESERVED);
 
     return m_camera->errorString();
 }
@@ -412,6 +440,13 @@ void QDeclarativeCamera::stop()
 void QDeclarativeCamera::setCameraMode(QDeclarativeCamera::Mode mode)
 {
     m_camera->setCaptureMode( static_cast<QCamera::CaptureMode>(mode) );
+
+    // For some reason QCamera does not emit cameraModeChanged() signal
+    // if it is in unloaded state.
+    if(m_camera->state() ==  QCamera::UnloadedState)
+        emit cameraModeChanged(static_cast<QDeclarativeCamera::Mode>(m_camera->captureMode()));
+
+    updateResources();
 }
 
 void QDeclarativeCamera::setCameraState(QDeclarativeCamera::State state)
@@ -424,17 +459,37 @@ void QDeclarativeCamera::setCameraState(QDeclarativeCamera::State state)
         return;
     }
 
+    m_pendingState = state;
+
+    QDeclarativeCamera::ResourcesStatus oldResStatus = m_resourcesStatus;
+
     switch (state) {
     case QDeclarativeCamera::ActiveState:
-        m_camera->start();
+    case QDeclarativeCamera::LoadedState:
+        if( m_resourcesStatus == QDeclarativeCamera::ResourcesGranted) {
+            if( state == QDeclarativeCamera::ActiveState) {
+                m_camera->start();
+            } else {
+                m_camera->stop();
+                m_camera->load();
+            }
+        } else if(m_resourcesStatus == QDeclarativeCamera::ResourcesNotNeeded) {
+            m_resourcesStatus = QDeclarativeCamera::ResourcesAcquiring;
+            m_cameraResources->acquire();
+        }
+        // else: In case of ResourcesAcquiring and ResourcesDenied nothing needs to be
+        //       done here. Camera is set to correct state in resourcesGranted() method.
         break;
     case QDeclarativeCamera::UnloadedState:
         m_camera->unload();
-        break;
-    case QDeclarativeCamera::LoadedState:
-        m_camera->load();
+        m_cameraResources->release();
+        m_resourcesStatus = QDeclarativeCamera::ResourcesNotNeeded;
         break;
     }
+
+    if(oldResStatus != m_resourcesStatus)
+        emit resourcesStatusChanged(m_resourcesStatus);
+
 }
 
 /*!
@@ -459,6 +514,9 @@ QDeclarativeCamera::LockStatus QDeclarativeCamera::lockStatus() const
 
 QDeclarativeCamera::RecordingState QDeclarativeCamera::recordingState() const
 {
+    if(!m_isValid)
+        return QDeclarativeCamera::Stopped;
+
     return static_cast<QDeclarativeCamera::RecordingState>(m_recorder->state());
 }
 
@@ -561,6 +619,11 @@ void QDeclarativeCamera::keyPressEvent(QKeyEvent * event)
 
     switch (event->key()) {
     case Qt::Key_CameraFocus:
+
+        // Check if usage of focus key is allowed
+        if(m_resourcesStatus != QDeclarativeCamera::ResourcesGranted)
+            return;
+
         if (m_camera->captureMode() == QCamera::CaptureStillImage) {
             m_camera->searchAndLock();
             return;
@@ -574,6 +637,11 @@ void QDeclarativeCamera::keyPressEvent(QKeyEvent * event)
         break;
     case Qt::Key_Camera:
     case Qt::Key_WebCam:
+
+        // Check if usage of camera key is allowed
+        if(m_resourcesStatus != QDeclarativeCamera::ResourcesGranted)
+            return;
+
         if (m_camera->captureMode() == QCamera::CaptureStillImage) {
             captureImage();
             return;
@@ -584,6 +652,15 @@ void QDeclarativeCamera::keyPressEvent(QKeyEvent * event)
                 stopRecording();
             return;
         }
+        break;
+    case Qt::Key_Zoom:
+    case Qt::Key_ZoomIn:
+    case Qt::Key_ZoomOut:
+    case Qt::Key_F7:
+    case Qt::Key_F8:
+        // Check if usage of zoom keys is allowed
+        if(m_resourcesStatus != QDeclarativeCamera::ResourcesGranted)
+            return;
         break;
     }
 
@@ -597,7 +674,11 @@ void QDeclarativeCamera::keyReleaseEvent(QKeyEvent * event)
 
     switch (event->key()) {
     case Qt::Key_CameraFocus:
-    case Qt::Key_F:
+
+        // Check if usage of focus key is allowed
+        if( m_resourcesStatus != QDeclarativeCamera::ResourcesGranted)
+            return;
+
         if (m_camera->captureMode() == QCamera::CaptureStillImage) {
             m_camera->unlock();
             return;
@@ -605,7 +686,21 @@ void QDeclarativeCamera::keyReleaseEvent(QKeyEvent * event)
         break;
     case Qt::Key_Camera:
     case Qt::Key_WebCam:
+
+        // Check if usage of camera key is allowed
+        if( m_resourcesStatus != QDeclarativeCamera::ResourcesGranted)
+            return;
+
         if (m_camera->captureMode() == QCamera::CaptureStillImage)
+            return;
+        break;
+    case Qt::Key_Zoom:
+    case Qt::Key_ZoomIn:
+    case Qt::Key_ZoomOut:
+    case Qt::Key_F7:
+    case Qt::Key_F8:
+        // Check if usage of zoom keys is allowed
+        if( m_resourcesStatus != QDeclarativeCamera::ResourcesGranted)
             return;
         break;
     }
@@ -895,6 +990,14 @@ qint64 QDeclarativeCamera::duration() const
     return m_recorder->duration();
 }
 
+QDeclarativeCamera::ResourcesStatus QDeclarativeCamera::resourcesStatus() const
+{
+    if (!m_isValid)
+        return QDeclarativeCamera::ResourcesNotNeeded;
+
+    return m_resourcesStatus;
+}
+
 void QDeclarativeCamera::setOpticalZoom(qreal value)
 {
     if (m_isValid)
@@ -943,6 +1046,125 @@ void QDeclarativeCamera::setManualWhiteBalance(int colorTemp) const
         m_camera->imageProcessing()->setManualWhiteBalance(colorTemp);
         emit manualWhiteBalanceChanged(manualWhiteBalance());
     }
+}
+
+void QDeclarativeCamera::_q_resourcesGranted(const QList<ResourcePolicy::ResourceType>& grantedOptionalResources)
+{
+    QDeclarativeCamera::ResourcesStatus oldStatus = m_resourcesStatus;
+
+    m_resourcesStatus = QDeclarativeCamera::ResourcesGranted;
+
+    if(m_camera->captureMode() == QCamera::CaptureVideo) {
+        // Resources granted in video captured mode => video resources are available
+        m_videoRecordingResourcesAvailable = true;
+    } else {
+        // In still capture mode video resources are granted when also all
+        // optional resources are granted (video resources are requested as optional in still mode).
+        if(grantedOptionalResources.count() == 3)
+            m_videoRecordingResourcesAvailable = true;
+        else
+            m_videoRecordingResourcesAvailable = false;
+    }
+
+    switch (m_pendingState) {
+    case QDeclarativeCamera::ActiveState:
+        m_camera->start();
+        break;
+    case QDeclarativeCamera::LoadedState:
+        m_camera->stop();
+        m_camera->load();
+        break;
+    case QDeclarativeCamera::UnloadedState:
+        m_resourcesStatus = QDeclarativeCamera::ResourcesNotNeeded;
+        m_camera->unload();
+        m_cameraResources->release();
+        break;
+    }
+
+    if(oldStatus != m_resourcesStatus)
+        emit resourcesStatusChanged(m_resourcesStatus);
+}
+
+void QDeclarativeCamera::_q_resourcesDenied()
+{
+    m_videoRecordingResourcesAvailable = false;
+
+    if( m_resourcesStatus != QDeclarativeCamera::ResourcesDenied) {
+        m_resourcesStatus = QDeclarativeCamera::ResourcesDenied;
+        emit resourcesStatusChanged(m_resourcesStatus);
+    }
+
+    m_camera->unload();
+}
+
+void QDeclarativeCamera::_q_lostResources()
+{
+    _q_resourcesDenied();
+}
+
+void QDeclarativeCamera::updateResources()
+{
+    QDeclarativeCamera::ResourcesStatus oldStatus = m_resourcesStatus;
+
+    // Scale button reources for zooming
+    m_cameraResources->addResource(ResourcePolicy::ScaleButtonType);
+
+    // SnapButton resource for image/video capture
+    m_cameraResources->addResource(ResourcePolicy::SnapButtonType);
+
+    // VideoPlaybackType resource for rendering viewfinder and replays of captured videos
+    m_cameraResources->addResource(ResourcePolicy::VideoPlaybackType);
+
+    m_cameraResources->deleteResource(ResourcePolicy::AudioPlaybackType);
+    m_cameraResources->deleteResource(ResourcePolicy::AudioRecorderType);
+    m_cameraResources->deleteResource(ResourcePolicy::VideoRecorderType);
+
+    if(m_camera->captureMode() == QCamera::CaptureVideo) {
+
+        // AudioPlaybackType resource for playing replays of captured videos
+        m_cameraResources->addResource(ResourcePolicy::AudioPlaybackType);
+
+        // VideoRecorderType resource for capturing video
+        m_cameraResources->addResource(ResourcePolicy::VideoRecorderType);
+
+        // AudioRecorderType resource for capturing audio for videos
+        m_cameraResources->addResource(ResourcePolicy::AudioRecorderType);
+
+        if(m_videoRecordingResourcesAvailable && m_resourcesStatus != QDeclarativeCamera::ResourcesDenied)
+            m_resourcesStatus = QDeclarativeCamera::ResourcesAcquiring;
+        else
+            m_resourcesStatus = QDeclarativeCamera::ResourcesDenied;
+
+    } else {
+
+        // In still mode resources needed only in video mode are added as optional
+        // resources. In that way it is known whether video mode resources are
+        // available when switching from still mode to video mode.
+
+        ResourcePolicy::AudioResource* audioResource = new ResourcePolicy::AudioResource();
+        audioResource->setOptional(true);
+        m_cameraResources->addResourceObject(audioResource);
+
+        ResourcePolicy::AudioRecorderResource* audioRecordResource = new ResourcePolicy::AudioRecorderResource();
+        audioRecordResource->setOptional(true);
+        m_cameraResources->addResourceObject(audioRecordResource);
+
+        ResourcePolicy::VideoRecorderResource* videoRecordResource = new ResourcePolicy::VideoRecorderResource();
+        videoRecordResource->setOptional(true);
+        m_cameraResources->addResourceObject(videoRecordResource);
+
+        if(m_resourcesStatus != QDeclarativeCamera::ResourcesDenied)
+            m_resourcesStatus = QDeclarativeCamera::ResourcesAcquiring;
+    }
+
+    // No resources must be used untill new resources granted message is received
+    m_camera->unload();
+
+    if(oldStatus != m_resourcesStatus)
+        emit resourcesStatusChanged(m_resourcesStatus);
+
+    // This will trigger new resources granted message if/when resources are available
+    m_cameraResources->update();
 }
 
 /*!

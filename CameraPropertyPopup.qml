@@ -50,6 +50,8 @@ Rectangle {
     border.width: 2
     smooth: true
     color: "#5e5e5e"
+    visible: opacity > 0
+    opacity: 0
 
     signal selected
 
@@ -57,6 +59,10 @@ Rectangle {
         model = newModel
         view.currentIndex = model.currentIndex()
         opacity = 1.0
+    }
+
+    function close() {
+        opacity = 0.0
     }
 
     GridView {

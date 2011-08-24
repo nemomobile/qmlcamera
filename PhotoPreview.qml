@@ -44,6 +44,7 @@ import QtMultimediaKit 1.1
 Rectangle {
     property alias source : preview.source
     signal closed
+    signal deleteImage
 
     color: "black"
 
@@ -60,5 +61,23 @@ Rectangle {
             parent.closed();
         }
     }
+
+    ImageButton {
+        id: deleteImageButton
+
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.bottomMargin: 0
+        anchors.leftMargin: 0
+        hMargin: 16
+        vMargin: 16
+        width: 80
+        height: 80
+
+        source: "images/icon-m-toolbar-delete.svg"
+
+        onClicked: parent.deleteImage()
+    }
+
 }
 

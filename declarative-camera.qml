@@ -47,12 +47,16 @@ Rectangle {
     color: "black"
     state: "Standby"
 
+    property alias imagePath : camera.capturedImagePath
+
+    signal deleteImage
+
     // This defines "active" state. For example when state is
-    // "PhotoCapture" active state is also "PhotoCapture" but
+    // "Capture" active state is also "Capture" but
     // when state changes to "Standby" active state remains as
-    // "PhotoCapture". When the app returns from "Standby"
+    // "Capture". When the app returns from "Standby"
     // state the active state will be activated.
-    property string activeState: "PhotoCapture"
+    property string activeState: "Capture"
 
     // Lens cover status
     // true = lens cover open
@@ -66,7 +70,6 @@ Rectangle {
     // false = not active
     property bool active : false
 
-//    property alias videoModeEnabled: captureControls.videoModeEnabled
     property alias videoModeEnabled: bottomPane.videoModeEnabled
 
     states: [
@@ -82,7 +85,7 @@ Rectangle {
             }
         },
         State {
-            name: "PhotoCapture"
+            name: "Capture"
             StateChangeScript {
                 script: {
                     captureControls.visible = true
@@ -124,40 +127,28 @@ Rectangle {
     // Toggles "Standby" state on/off
     function toggleStandby(standbyStatus)
     {
-        //console.log("meego-handset-camera: toggleStandby = " + standbyStatus)
-        //console.log("meego-handset-camera: toggleStandby: state = " + state + "  active = " + active)
         if(standbyStatus && state != "Standby") {
             // Go to standby mode
             activeState = state
             state = "Standby"
-            //console.log("meego-handset-camera: go to standby")
         } else if(!standbyStatus && state == "Standby" && active) {
             // Wake up from standby mode
-            //console.log("meego-handset-camera: wake up from standby to state " + activeState)
             state = activeState
         }
     }
 
     onStateChanged: {
-        //console.log("meego-handset-camera: onStateChanged = " + state)
         if(state == "Standby") {
-            //console.log("meego-handset-camera: onStateChanged: Standby: camera to UnloadedState")
             camera.cameraState = "UnloadedState"
-        } else if(state == "PhotoCapture") {
-            //console.log("meego-handset-camera: onStateChanged: PhotoCapture")
+        } else if(state == "Capture") {
 
             if(lensCoverStatus) {
-                //console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover open ->  camera to ActiveState")
                 camera.cameraState = "ActiveState"
                 camera.visible = true
                 camera.focus = true
             } else {
-                if( camera.cameraState = "ActiveState" ) {
-                    //console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover closed -> camera to LoadedState")
+                if( camera.cameraState = "ActiveState" )
                     camera.cameraState = "UnloadedState"
-                } else {
-                    //console.log("meego-handset-camera: onStateChanged: PhotoCapture: lens cover closed")
-                }
 
                 camera.focus = false
                 camera.visible = false
@@ -166,28 +157,30 @@ Rectangle {
     }
 
     onLensCoverStatusChanged: {
-        //console.log("meego-handset-camera: onLensCoverStatusChanged = " + lensCoverStatus)
 
         if(!lensCoverStatus) {
-            //console.log("meego-handset-camera: onLensCoverStatusChanged: stop camera")
             if( camera.cameraState = "ActiveState" )
                 camera.cameraState = "UnloadedState"
-            //    camera.cameraState = "LoadedState"
-        } else if(state == "PhotoCapture") {
-            //console.log("meego-handset-camera: onLensCoverStatusChanged: start camera")
+        } else if(state == "Capture") {
             camera.cameraState = "ActiveState"
             camera.focus = true
         }
     }
 
     onActiveChanged: {
-        //console.log("meego-handset-camera ACTIVE = " + active )
-
         toggleStandby(!active)
     }
 
     CameraSettings {
         id: settings
+    }
+
+    MouseArea {
+        anchors.fill: parent
+
+        onPressed: {
+            cameraPropertyPopup.close()
+        }
     }
 
     MeegoCamera {
@@ -200,6 +193,7 @@ Rectangle {
         focus: false
         visible: false
         cameraState: "UnloadedState"
+        cameraMode: settings.cameraMode
 
         captureResolution : settings.captureResolution
         videoCaptureResolution: settings.videoCaptureResolution
@@ -220,10 +214,9 @@ Rectangle {
         }
 
         onCameraStateChanged : {
-            console.log("meego-handset-camera: CAMERA STATE = " + cameraState)
             visible = true
         }
-        
+
         Keys.onPressed : {
             if (event.key == Qt.Key_Camera || event.key == Qt.Key_WebCam ) {
                 // Capture button fully pressed
@@ -286,16 +279,26 @@ Rectangle {
 
     Text {
         id: infoText
-        visible: parent.state == "Standby" || (parent.state == "PhotoCapture" && !lensCoverStatus)
+        visible: text != ""
         color: "white"
         font.pixelSize: 36
-        anchors.left: parent.left
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        width: captureControls.visible ? parent.width - captureControls.settingsPaneWidth : parent.width
+        anchors.fill: parent
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        text: parent.state == "Standby" ? "Standby" : "Lens cover closed"
+        text:  {
+            if( parent.state == "Standby") {
+                "Standby"
+            } else {
+                if(!lensCoverStatus)
+                    "Lens cover closed"
+                else if(camera.resourcesStatus == MeegoCamera.ResourcesDenied)
+                    "Busy"
+                else if(camera.error != MeegoCamera.NoError)
+                    "Error"
+                else
+                    ""
+            }
+        }
     }
 
     CaptureControls {
@@ -318,9 +321,6 @@ Rectangle {
         anchors.rightMargin: captureControls.settingsPaneWidth
         anchors.leftMargin: captureControls.settingsPaneWidth
 
-        visible: opacity > 0
-        opacity: 0
-
         // Initialize with empty model
         model: CameraPropertyModel {
             ListModel {}
@@ -331,23 +331,30 @@ Rectangle {
         }
 
         onSelected: {
-            opacity = 0.0
+            close()
         }
     }
 
     PhotoPreview {
         id : photoPreview
         anchors.fill : parent
-        onClosed: changeState("PhotoCapture")
+        onClosed: changeState("Capture")
         focus: visible
+
+        onDeleteImage: {
+            parent.deleteImage()
+            closed()
+        }
 
         Keys.onPressed : {
             //return to capture mode if the shutter button is touched
             if (event.key == Qt.Key_CameraFocus || event.key == Qt.Key_WebCam ) {
-                changeState("PhotoCapture")
+                closed()
                 event.accepted = true;
             }
         }
+
+
     }
 
     TopPane {
@@ -364,7 +371,7 @@ Rectangle {
         settings: settings
         propertyPopup: cameraPropertyPopup
 
-        quickSettingsVisible : cameraUI.state == "PhotoCapture"
+        quickSettingsVisible : cameraUI.state == "Capture"
 
         onHomePressed: mainWindow.showMinimized()
         onQuitPressed: Qt.quit()
@@ -381,8 +388,14 @@ Rectangle {
         height: 48
 
         camera: camera
+        settings: settings
 
         onPreviewSelected: changeState("PhotoPreview")
+    }
+
+
+    onDeleteImage: {
+      bottomPane.previewAvailable = false
     }
 
 

@@ -51,6 +51,7 @@
 #include <qcameraimageprocessing.h>
 #include <qcameraimagecapture.h>
 #include <qmediarecorder.h>
+#include <policy/resource-set.h>
 
 
 
@@ -70,6 +71,7 @@ class QDeclarativeCamera : public QDeclarativeItem
     Q_PROPERTY(LockStatus lockStatus READ lockStatus NOTIFY lockStatusChanged)
     Q_PROPERTY(RecordingState recordingState READ recordingState NOTIFY recordingStateChanged)
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorChanged)
+    Q_PROPERTY(Error error READ error NOTIFY errorChanged)
 
     Q_PROPERTY(QString capturedImagePath READ capturedImagePath NOTIFY imageSaved)
     Q_PROPERTY(QString capturedVideoPath READ capturedVideoPath NOTIFY capturedVideoPathChanged)
@@ -102,6 +104,8 @@ class QDeclarativeCamera : public QDeclarativeItem
     Q_PROPERTY(bool muted READ isMuted WRITE setMuted NOTIFY mutedChanged)
     Q_PROPERTY(qint64 duration READ duration NOTIFY durationChanged)
 
+    Q_PROPERTY(ResourcesStatus resourcesStatus READ resourcesStatus NOTIFY resourcesStatusChanged)
+
     Q_ENUMS(Mode)
     Q_ENUMS(State)
     Q_ENUMS(LockStatus)
@@ -111,6 +115,7 @@ class QDeclarativeCamera : public QDeclarativeItem
     Q_ENUMS(ExposureMode)
     Q_ENUMS(WhiteBalanceMode)
     Q_ENUMS(VideoEncodingQuality)
+    Q_ENUMS(ResourcesStatus)
 public:
     enum Mode
     {
@@ -198,6 +203,13 @@ public:
         VeryHighQuality = QtMultimediaKit::VeryHighQuality
     };
 
+    enum ResourcesStatus {
+        ResourcesNotNeeded = 0,
+        ResourcesAcquiring,
+        ResourcesGranted,
+        ResourcesDenied
+    };
+
     QDeclarativeCamera(QDeclarativeItem *parent = 0);
     ~QDeclarativeCamera();
 
@@ -244,6 +256,8 @@ public:
 
     bool isMuted() const;
     qint64 duration() const;
+
+    ResourcesStatus resourcesStatus() const;
 
 public Q_SLOTS:
     void start();
@@ -327,6 +341,8 @@ Q_SIGNALS:
     void mutedChanged(bool);
     void durationChanged(qint64);
 
+    void resourcesStatusChanged(ResourcesStatus);
+
 protected:
     void geometryChanged(const QRectF &geometry, const QRectF &);
     void keyPressEvent(QKeyEvent * event);
@@ -338,6 +354,7 @@ private Q_SLOTS:
     void _q_updateRecordingState(QMediaRecorder::State);
     void _q_nativeSizeChanged(const QSizeF &size);
     void _q_error(int, const QString &);
+    void _q_cameraError(QCamera::Error);
     void _q_imageCaptured(int, const QImage&);
     void _q_imageSaved(int, const QString&);
     void _q_captureFailed(int, QCameraImageCapture::Error, const QString&);
@@ -346,6 +363,15 @@ private Q_SLOTS:
     void _q_updateLockStatus(QCamera::LockType, QCamera::LockStatus, QCamera::LockChangeReason);
     void _q_updateImageSettings();
     void _q_applyPendingState();
+
+    // Resource Policy Framework callbacks
+    void _q_resourcesGranted(const QList<ResourcePolicy::ResourceType>& grantedOptionalResources);
+    void _q_resourcesDenied();
+    void _q_lostResources();
+
+private:
+
+    void updateResources();
 
 private:
     Q_DISABLE_COPY(QDeclarativeCamera)
@@ -373,6 +399,10 @@ private:
     State m_pendingState;
     bool m_isStateSet;
     bool m_isValid;
+
+    ResourcePolicy::ResourceSet* m_cameraResources;
+    ResourcesStatus m_resourcesStatus;
+    bool m_videoRecordingResourcesAvailable;
 };
 
 QT_END_NAMESPACE

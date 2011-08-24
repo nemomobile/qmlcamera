@@ -8,8 +8,6 @@
 #include <sys/stat.h>
 #include <QFile>
 
-
-
 #include <QtGui/QApplication>
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/QDeclarativeEngine>
@@ -25,8 +23,9 @@
 #include "qmlcamerasettings.h"
 
 
-#define GPIO_KEYS "/dev/input/gpio-keys"
+#include <QFile>
 
+#define GPIO_KEYS "/dev/input/gpio-keys"
 
 MeegoCamera::MeegoCamera(bool visible): QObject(),
     m_uiVisible(visible),
@@ -35,7 +34,8 @@ MeegoCamera::MeegoCamera(bool visible): QObject(),
     m_gpioNotifier(0),
     m_server(0),
     m_connections(0),
-    m_view(0)
+    m_view(0),
+    m_resourcesGranted(false)
 {
     //qDebug() << Q_FUNC_INFO;
 
@@ -64,13 +64,28 @@ MeegoCamera::MeegoCamera(bool visible): QObject(),
 
     //qDebug() << Q_FUNC_INFO << "gpio device opened";
 
-    m_volumeKeyResource = new ResourcePolicy::ResourceSet("camera", this);
-    m_volumeKeyResource->setAlwaysReply();
-    // No need to connect resourcesGranted() or lostResources() signals for now.
-    // Camera UI will be started even if ScaleButtonResource resource is not granted.
+    m_cameraForegroundResources = new ResourcePolicy::ResourceSet("camera", this);
+    m_cameraForegroundResources->setAlwaysReply();
 
-    ResourcePolicy::ScaleButtonResource *volumeKeys = new ResourcePolicy::ScaleButtonResource;
-    m_volumeKeyResource->addResourceObject(volumeKeys);
+    m_cameraBackgroundResources = new ResourcePolicy::ResourceSet("background", this);
+    m_cameraBackgroundResources->setAlwaysReply();
+
+    connect(m_cameraForegroundResources, SIGNAL(resourcesGranted(const QList<ResourcePolicy::ResourceType>)), this, SLOT(resourcesGranted(QList<ResourcePolicy::ResourceType>)));
+    connect(m_cameraForegroundResources, SIGNAL(resourcesDenied()), this, SLOT(resourcesDenied()));
+    connect(m_cameraForegroundResources, SIGNAL(lostResources()), this, SLOT(lostResources()));
+
+    // LensCover resource for getting lenscover state when camera app is in foreground.
+    // Other needed resources are handled in QDeclarativeCamera.
+    m_cameraForegroundResources->addResource(ResourcePolicy::LensCoverType);
+
+    connect(m_cameraBackgroundResources, SIGNAL(resourcesGranted(const QList<ResourcePolicy::ResourceType>)), this, SLOT(resourcesGranted(QList<ResourcePolicy::ResourceType>)));
+    connect(m_cameraBackgroundResources, SIGNAL(resourcesDenied()), this, SLOT(resourcesDenied()));
+    connect(m_cameraBackgroundResources, SIGNAL(lostResources()), this, SLOT(lostResources()));
+
+    // If UI is not visible or active the needed resources are snap button and camera hw
+    // camera HW button to bring UI to foreground when pressed
+    m_cameraBackgroundResources->addResource(ResourcePolicy::LensCoverType);
+    m_cameraBackgroundResources->addResource(ResourcePolicy::SnapButtonType);
 
     //qDebug() << Q_FUNC_INFO << "volume key resource connected";
 
@@ -86,7 +101,8 @@ MeegoCamera::~MeegoCamera()
 {
     //qDebug() << Q_FUNC_INFO;
 
-    m_volumeKeyResource->release();
+    m_cameraForegroundResources->release();
+    m_cameraBackgroundResources->release();
 
     //qDebug() << Q_FUNC_INFO << "volume ker resource released";
 
@@ -136,11 +152,7 @@ void MeegoCamera::createCamera()
         m_view->setSource(QUrl(mainQmlApp));
 
         m_view->rootObject()->setProperty("lensCoverStatus", m_coverState);
-
-        // Enable video capturing only if ti-dsp codecs are installed and running.
-        // Video recording does not work in current camera pipelinewithout them.
-        QFileInfo fi("/dev/DspBridge");
-        m_view->rootObject()->setProperty("videoModeEnabled", fi.exists());
+        m_view->rootObject()->setProperty("videoModeEnabled", isVideoCaptureSupported());
 
         m_view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
         // Qt.quit() called in embedded .qml by default only emits
@@ -155,7 +167,9 @@ void MeegoCamera::createCamera()
         m_view->setGeometry(QRect(0, 0, 800, 480));
         m_view->installEventFilter(this);
 
-        //qDebug() << Q_FUNC_INFO << "new UI ready";
+	QObject::connect(m_view->rootObject(), SIGNAL(deleteImage()), this, SLOT(deleteImage()));
+        
+	//qDebug() << Q_FUNC_INFO << "new UI ready";
     }
 }
 
@@ -196,18 +210,22 @@ void MeegoCamera::HandleGpioKeyEvent(struct input_event &ev)
         }
     } else if (ev.code == 212 && ev.value == 1 ) { // Camera button pressed
         // Check if UI is running and show it if not
-        showUI();
+        if(m_resourcesGranted)
+            showUI();
     } else if ((ev.code == 9 && ev.value == 0) ) { // Lens cover opened
         //qDebug() << Q_FUNC_INFO << "lens cover opened ->";
         // Check if UI is running and show it if not
         m_coverState = true;
-        showUI();
-        m_view->rootObject()->setProperty("lensCoverStatus",true);
+        if(m_resourcesGranted) {
+            showUI();
+            m_view->rootObject()->setProperty("lensCoverStatus",true);
+        }
         //qDebug() << Q_FUNC_INFO << "lens cover opened <-";
     } else if (ev.code == 9 && ev.value == 1) { // Lens cover closed
         //qDebug() << Q_FUNC_INFO << "lens cover closed ->";
         m_coverState = false;
-        hideUI();
+        if(m_resourcesGranted)
+            hideUI();
         //qDebug() << Q_FUNC_INFO << "lens cover closed <-";
     }
 }
@@ -218,7 +236,7 @@ void MeegoCamera::hideUI()
     //qDebug() << Q_FUNC_INFO << "->";
     m_uiVisible = false;
 
-    m_volumeKeyResource->release();
+//    m_cameraResources->release();
 
     if (m_view) {
         //qDebug() << Q_FUNC_INFO << "hide";
@@ -235,12 +253,14 @@ void MeegoCamera::hideUI()
         m_view = 0;
     }
     //qDebug() << Q_FUNC_INFO << "<-";
+
+    updateResources();
 }
 
 void MeegoCamera::showUI()
 {
     //qDebug() << Q_FUNC_INFO << "show ->";
-    m_volumeKeyResource->acquire();
+    //m_cameraResources->acquire();
     createCamera();
 
     //qDebug() << Q_FUNC_INFO << "show: camera created";
@@ -253,6 +273,30 @@ void MeegoCamera::showUI()
     m_view->rootObject()->setProperty("active",true);
     m_uiVisible = true;
     //qDebug() << Q_FUNC_INFO << "show <-";
+
+    updateResources();
+}
+
+bool MeegoCamera::isVideoCaptureSupported() const
+{
+    // Video capture is supported only if ti-dsp codecs are installed and running.
+    // Video recording does not work in current camera pipelinewithout them.
+    QFileInfo fi("/dev/DspBridge");
+    return fi.exists();
+
+}
+
+void MeegoCamera::updateResources()
+{
+
+    if(m_uiVisible && m_view && m_view->isActiveWindow()) {
+        m_cameraBackgroundResources->release();
+        m_cameraForegroundResources->acquire();
+    } else {
+        m_cameraForegroundResources->release();
+        m_cameraBackgroundResources->acquire();
+    }
+
 }
 
 void MeegoCamera::newConnection()
@@ -289,21 +333,13 @@ bool MeegoCamera::eventFilter(QObject* watched, QEvent* event)
 
             m_view->rootObject()->setProperty("active",m_view->isActiveWindow());
 
-            // Acquire access to volume keys when the UI is active
-            // and release the keys when the UI is deactive i.e.
-            // minimized to task switcher.
-            if(m_view->isActiveWindow())
-                m_volumeKeyResource->acquire();
-            else
-                m_volumeKeyResource->release();
+            updateResources();
         }
 
         if(event->type() == QEvent::Close) {
             //qDebug() << Q_FUNC_INFO << "window closed";
 
             m_uiVisible = false;
-
-            m_volumeKeyResource->release();
 
             if ( !m_background ) {
                 emit quit();
@@ -337,5 +373,25 @@ bool MeegoCamera::getSwitchState(int fd, int key)
     memset(keys, 0, sizeof *keys);
     ioctl(fd, EVIOCGSW(sizeof(keys)), keys);
     return (keys[key/8] & (1 << (key % 8)));
+}
+
+void MeegoCamera::deleteImage()
+{
+    QFile::remove( m_view->rootObject()->property("imagePath").toString());
+}
+
+void MeegoCamera::resourcesGranted(const QList<ResourcePolicy::ResourceType>& /*grantedOptionalResources*/)
+{
+    m_resourcesGranted = true;
+}
+
+void MeegoCamera::resourcesDenied()
+{
+    m_resourcesGranted = false;
+}
+
+void MeegoCamera::lostResources()
+{
+    m_resourcesGranted = false;
 }
 
