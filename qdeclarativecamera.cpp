@@ -625,7 +625,8 @@ void QDeclarativeCamera::keyPressEvent(QKeyEvent * event)
             return;
 
         if (m_camera->captureMode() == QCamera::CaptureStillImage) {
-            m_camera->searchAndLock();
+            if(m_camera->lockStatus() == QCamera::Unlocked)
+                m_camera->searchAndLock();
             return;
         } else if (m_camera->captureMode() == QCamera::CaptureVideo) {
             if(m_recorder->state() == QMediaRecorder::PausedState)

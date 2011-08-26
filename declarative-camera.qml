@@ -178,8 +178,17 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
 
-        onPressed: {
-            cameraPropertyPopup.close()
+        onPressed: { // User tapped vf background
+            // First priority is to close open popup/menus
+            if(cameraPropertyPopup.visible) {
+                cameraPropertyPopup.close()
+            } else if(camera.cameraMode == MeegoCamera.CaptureStillImage) {
+                // If no popup open let's lock/unlock camera
+                if(camera.lockStatus == MeegoCamera.Unlocked)
+                    camera.searchAndLock()
+                else
+                    camera.unlock()
+            }
         }
     }
 
