@@ -46,6 +46,7 @@ Rectangle {
     id : cameraUI
     color: "black"
     state: "Standby"
+    anchors.fill: parent
 
     property alias imagePath : camera.capturedImagePath
 

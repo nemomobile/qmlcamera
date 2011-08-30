@@ -26,6 +26,7 @@
 #include <QFile>
 
 #define GPIO_KEYS "/dev/input/gpio-keys"
+#define MAIN_QML_FILE "qrc:/main.qml"
 
 MeegoCamera::MeegoCamera(bool visible): QObject(),
     m_uiVisible(visible),
@@ -139,7 +140,7 @@ void MeegoCamera::createCamera()
     if (!m_view) {
         //qDebug() << Q_FUNC_INFO << "new UI created";
 
-        const QString mainQmlApp = QLatin1String("qrc:/declarative-camera.qml");
+        const QString mainQmlApp = QLatin1String(MAIN_QML_FILE);
 
         m_view = new QDeclarativeView;
 
@@ -377,6 +378,7 @@ bool MeegoCamera::getSwitchState(int fd, int key)
 
 void MeegoCamera::deleteImage()
 {
+    qDebug() << Q_FUNC_INFO << "file = " << m_view->rootObject()->property("imagePath").toString();
     QFile::remove( m_view->rootObject()->property("imagePath").toString());
 }
 

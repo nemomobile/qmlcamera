@@ -46,4 +46,5 @@ OTHER_FILES += \
     TopPane.qml \
     BottomPane.qml \
     QuickSettingsPane.qml \
-    CameraPropertyModel.qml
+    CameraPropertyModel.qml \
+    main.qml
