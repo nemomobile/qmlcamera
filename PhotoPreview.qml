@@ -69,12 +69,12 @@ Rectangle {
         anchors.left: parent.left
         anchors.bottomMargin: 0
         anchors.leftMargin: 0
-        hMargin: 16
-        vMargin: 16
-        width: 80
-        height: 80
+        hMargin: 6
+        vMargin: 6
+        width: 60
+        height: 60
 
-        source: "images/icon-m-toolbar-delete.svg"
+        source: "image://theme/icon-m-toolbar-delete"
 
         onClicked: parent.deleteImage()
     }

@@ -41,6 +41,8 @@
 import Qt 4.7
 import QtMultimediaKit 1.1
 import com.meego.MeegoHandsetCamera 1.0
+import QtQuick 1.0
+import com.nokia.meego 1.0
 
 Rectangle {
     id : cameraUI
@@ -177,13 +179,17 @@ Rectangle {
     }
 
     MouseArea {
-        anchors.fill: parent
+        id: focusTouchPad
+        anchors.left: leftPane.right
+        anchors.right: captureControls.left
+        anchors.top: topPane.bottom
+        anchors.bottom: bottomPane.top
 
         onPressed: { // User tapped vf background
             // First priority is to close open popup/menus
             if(cameraPropertyPopup.visible) {
                 cameraPropertyPopup.close()
-            } else if(camera.cameraMode == MeegoCamera.CaptureStillImage) {
+            } else if(camera.cameraMode == MeegoCamera.CaptureStillImage && camera.cameraState == MeegoCamera.ActiveState) {
                 // If no popup open let's lock/unlock camera
                 if(camera.lockStatus == MeegoCamera.Unlocked)
                     camera.searchAndLock()
@@ -315,8 +321,20 @@ Rectangle {
         id: captureControls
         anchors.top: topPane.bottom
         anchors.bottom: bottomPane.top
-        anchors.left: parent.left
         anchors.right: parent.right
+        camera: camera
+        width: 64
+    }
+
+    LeftPane {
+        id: leftPane
+
+        anchors.left: parent.left
+        anchors.top: topPane.bottom
+        anchors.bottom: bottomPane.top
+
+        width: 100
+
         camera: camera
     }
 
@@ -324,12 +342,10 @@ Rectangle {
         id: cameraPropertyPopup
 
         height: 96
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.left: leftPane.right
+        anchors.right: captureControls.left
         anchors.top: topPane.bottom
         anchors.topMargin: 6
-        anchors.rightMargin: captureControls.settingsPaneWidth
-        anchors.leftMargin: captureControls.settingsPaneWidth
 
         // Initialize with empty model
         model: CameraPropertyModel {
@@ -374,8 +390,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.top: parent.top
 
-        anchors.margins: 6
-        height: 48
+        height: 60
 
         camera: camera
         settings: settings
@@ -394,8 +409,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
 
-        anchors.margins: 6
-        height: 48
+        height: 60
 
         camera: camera
         settings: settings
@@ -407,6 +421,5 @@ Rectangle {
     onDeleteImage: {
       bottomPane.previewAvailable = false
     }
-
 
 }

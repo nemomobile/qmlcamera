@@ -52,22 +52,22 @@ Item {
                     id: flashModesButtonListModel
 
                     ListElement {
-                        icon: "images/icon-m-camera-flash-auto-screen.svg"
+                        icon: "image://theme/icon-m-camera-flash-auto-screen"
                         value: MeegoCamera.FlashAuto
                         text: "Auto"
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-flash-off-screen.svg"
+                        icon: "image://theme/icon-m-camera-flash-off-screen"
                         value: MeegoCamera.FlashOff
                         text: "Off"
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-flash-always-screen.svg"
+                        icon: "image://theme/icon-m-camera-flash-always-screen"
                         value: MeegoCamera.FlashOn
                         text: "On"
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-flash-red-eye-screen.svg"
+                        icon: "image://theme/icon-m-camera-flash-red-eye-screen"
                         value: MeegoCamera.FlashRedEyeReduction
                         text: "Red Eye Reduction"
                     }
@@ -96,27 +96,27 @@ Item {
                     id: wbModesButtonListModel
 
                     ListElement {
-                        icon: "images/icon-m-camera-whitebalance-auto-screen.svg"
+                        icon: "image://theme/icon-m-camera-whitebalance-auto-screen"
                         value: MeegoCamera.WhiteBalanceAuto
                         text: "Auto"
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-whitebalance-sunny-screen.svg"
+                        icon: "image://theme/icon-m-camera-whitebalance-sunny-screen"
                         value: MeegoCamera.WhiteBalanceSunlight
                         text: "Sunlight"
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-whitebalance-cloudy-screen.svg"
+                        icon: "image://theme/icon-m-camera-whitebalance-cloudy-screen"
                         value: MeegoCamera.WhiteBalanceCloudy
                         text: "Cloudy"
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-whitebalance-tungsten-screen.svg"
+                        icon: "image://theme/icon-m-camera-whitebalance-tungsten-screen"
                         value: MeegoCamera.WhiteBalanceIncandescent
                         text: "Incandescent"
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-whitebalance-fluorescent-screen.svg"
+                        icon: "image://theme/icon-m-camera-whitebalance-fluorescent-screen"
                         value: MeegoCamera.WhiteBalanceFluorescent
                         text: "Fluorescent"
                     }
@@ -147,57 +147,57 @@ Item {
                 model: ListModel {
                     id: exposureCompensationButtonListModel
                     ListElement {
-                        icon: "images/icon-m-camera-exposure-minus2.svg"
+                        icon: "image://theme/icon-m-camera-exposure-minus2"
                         value: -2.0
                         text: ""
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-exposure-minus17.svg"
+                        icon: "image://theme/icon-m-camera-exposure-minus17"
                         value: -1.7
                         text: ""
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-exposure-minus1.svg"
+                        icon: "image://theme/icon-m-camera-exposure-minus1"
                         value: -1.0
                         text: ""
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-exposure-minus07.svg"
+                        icon: "image://theme/icon-m-camera-exposure-minus07"
                         value: -0.7
                         text: ""
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-exposure-minus03.svg"
+                        icon: "image://theme/icon-m-camera-exposure-minus03"
                         value: -0.3
                         text: ""
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-exposure-0.svg"
+                        icon: "image://theme/icon-m-camera-exposure-0"
                         value: 0.0
                         text: ""
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-exposure-plus03.svg"
+                        icon: "image://theme/icon-m-camera-exposure-plus03"
                         value: 0.3
                         text: ""
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-exposure-plus07.svg"
+                        icon: "image://theme/icon-m-camera-exposure-plus07"
                         value: 0.7
                         text: ""
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-exposure-plus1.svg"
+                        icon: "image://theme/icon-m-camera-exposure-plus1"
                         value: 1.0
                         text: ""
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-exposure-plus13.svg"
+                        icon: "image://theme/icon-m-camera-exposure-plus13"
                         value: 1.3
                         text: ""
                     }
                     ListElement {
-                        icon: "images/icon-m-camera-exposure-plus2.svg"
+                        icon: "image://theme/icon-m-camera-exposure-plus2"
                         value: 2.0
                         text: ""
                     }

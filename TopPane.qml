@@ -20,7 +20,10 @@ Item {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
 
-        source: "images/icon-m-framework-home.svg"
+        hMargin: 6
+        vMargin: 6
+
+        source: "image://theme/icon-m-framework-home"
 
         onClicked: homePressed()
     }
@@ -33,6 +36,8 @@ Item {
         anchors.left: homeButton.right
         anchors.right: quitButton.left
 
+        anchors.topMargin: 6
+        anchors.bottomMargin: 6
         anchors.leftMargin: 64
         anchors.rightMargin: 6
 
@@ -50,8 +55,10 @@ Item {
         anchors.bottom: parent.bottom
         anchors.right : parent.right
 
+        hMargin: 6
+        vMargin: 6
 
-        source: "images/icon-m-framework-close.svg"
+        source: "image://theme/icon-m-framework-close"
 
         onClicked: quitPressed()
     }

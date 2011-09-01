@@ -1,4 +1,7 @@
 import Qt 4.7
+import QtQuick 1.0
+import QtQuick 1.0
+import com.nokia.meego 1.0
 
 Item {
     id: button
@@ -10,6 +13,8 @@ Item {
     property int hMargin : 0
     property int vMargin : 0
 
+    property Style platformStyle: ButtonStyle {}
+
     property alias text: text.text
     property alias textColor: text.color
     property real fontSize: 1.0
@@ -20,6 +25,21 @@ Item {
         id: mouseArea
         anchors.fill: parent
         onClicked: button.clicked()
+    }
+
+    BorderImage {
+        id: background
+        anchors.fill: parent
+        smooth: true
+        visible: source != ""
+        border {
+            left: platformStyle.backgroundMarginLeft;
+            top: platformStyle.backgroundMarginTop;
+            right: platformStyle.backgroundMarginRight;
+            bottom: button.platformStyle.backgroundMarginBottom
+        }
+
+        source: mouseArea.pressed ? button.platformStyle.pressedBackground : "";
     }
 
     Item {
@@ -46,12 +66,13 @@ Item {
         Image {
             id: image
 
-            x: text.visible ? text.x + text.width + imageHorizontalAlignment * width : parent.x + imageHorizontalAlignment * width
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.left: text.visible ? text.right : parent.left
+            anchors.right: parent.right
 
-            width: text.visible ? parent.width - text.width - imageMargins * 2 : parent.width - imageMargins * 2
-            height: parent.height - imageMargins * 2
+            anchors.margins: imageMargins
 
-            anchors.verticalCenter: parent.verticalCenter
             fillMode: Image.PreserveAspectFit
             smooth: true
         }

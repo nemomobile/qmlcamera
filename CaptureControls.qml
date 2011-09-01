@@ -42,36 +42,35 @@ import Qt 4.7
 import QtMultimediaKit 1.1
 import com.meego.MeegoHandsetCamera 1.0
 
-FocusScope {
+Item {
     id : captureControls
 
     property QtObject camera
-    property alias settingsPaneWidth : captureButtonsColumn.width
-
-    signal previewSelected
 
     Column {
         id: captureButtonsColumn
-        spacing : 4
-        anchors.right : parent.right
-        anchors.rightMargin: 8
-        anchors.top : parent.top
         anchors.topMargin: 48
+        anchors.fill: parent
+        anchors.bottomMargin: 8
 
         ImageButton {
-            width : 48
-            height: 48
-            anchors.horizontalCenter: parent.horizontalCenter
-            source: "images/icon-m-toolbar-camera.svg"
+            height: width
+            anchors.left: parent.left
+            anchors.right: parent.right
+            hMargin: 8
+            vMargin: 8
+            source: "image://theme/icon-m-toolbar-camera"
             onClicked: camera.captureImage()
             visible: camera.cameraMode == MeegoCamera.CaptureStillImage && camera.cameraState == MeegoCamera.ActiveState
         }
 
         ImageButton {
-            width : 48
-            height: 48
-            anchors.horizontalCenter: parent.horizontalCenter
-            source: "images/icon-m-camera-video-record.svg"
+            height: width
+            anchors.left: parent.left
+            anchors.right: parent.right
+            hMargin: 8
+            vMargin: 8
+            source: "image://theme/icon-m-camera-video-record"
             visible: camera.cameraMode == MeegoCamera.CaptureVideo &&
                      camera.cameraState == MeegoCamera.ActiveState &&
                      (camera.recordingState == MeegoCamera.Stopped || camera.recordingState == MeegoCamera.Paused)
@@ -79,80 +78,14 @@ FocusScope {
         }
 
         ImageButton {
-            width : 48
-            height: 48
-            anchors.horizontalCenter: parent.horizontalCenter
-            source: "images/icon-m-camera-pause.svg"
+            height: width
+            anchors.left: parent.left
+            anchors.right: parent.right
+            hMargin: 8
+            vMargin: 8
+            source: "image://theme/icon-m-camera-pause"
             visible: camera.cameraMode == MeegoCamera.CaptureVideo && camera.recordingState == MeegoCamera.Recording
             onClicked: camera.pauseRecording()
         }
-    }
-
-    Item {
-        id: exposureDetails
-        anchors.bottom : parent.bottom
-        anchors.left : parent.left
-        anchors.bottomMargin: 16
-        anchors.leftMargin: 16
-        height: childrenRect.height
-        width: childrenRect.width
-
-        visible : camera.lockStatus == MeegoCamera.Locked
-
-        Rectangle {
-            opacity: 0.4
-            color: "black"
-            anchors.fill: parent
-        }
-
-        Row {
-            spacing : 16
-
-            Text {
-                text: "Av: "+camera.aperture.toFixed(1)
-                font.pixelSize: 18
-                color: "white"
-                visible: camera.aperture > 0
-            }
-
-            Text {
-                font.pixelSize: 18
-                color: "white"
-                visible: camera.shutterSpped > 0
-                text: "Tv: "+printableExposureTime(camera.shutterSpeed)
-
-                function printableExposureTime(t) {
-                    if (t > 3.9)
-                        return "Tv: "+t.toFixed() + "\"";
-
-                    if (t > 0.24 )
-                        return "Tv: "+t.toFixed(1) + "\"";
-
-                    if (t > 0)
-                        return "Tv: 1/"+(1/t).toFixed();
-
-                    return "";
-                }
-            }
-
-            Text {
-                text: "ISO: "+camera.iso.toFixed()
-                font.pixelSize: 18
-                color: "white"
-                visible: camera.iso > 0
-            }
-        }
-    }
-
-    ZoomControl {
-        visible: camera.cameraState == MeegoCamera.ActiveState
-        x : 0
-        y : 0
-        width : 100
-        height: parent.height
-
-        currentZoom: camera.digitalZoom
-        maximumZoom: Math.min(4.0, camera.maximumDigitalZoom)
-        onZoomTo: camera.setDigitalZoom(value)
     }
 }

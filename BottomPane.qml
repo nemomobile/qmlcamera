@@ -14,11 +14,14 @@ Item {
     ImageButton {
         id: viewButton
 
-        source: "images/icon-m-toolbar-gallery.svg"
+        source: "image://theme/icon-m-toolbar-gallery"
 
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.left: parent.left
+
+        hMargin: 6
+        vMargin: 6
 
         width: viewButton.height
 
@@ -30,11 +33,14 @@ Item {
     ImageButton {
         id: modeButton
 
-        source: camera.cameraMode == MeegoCamera.CaptureVideo ? "images/icon-m-toolbar-camera.svg" : "images/icon-m-camera-video.svg"
+        source: camera.cameraMode == MeegoCamera.CaptureVideo ? "image://theme/icon-m-toolbar-camera" : "image://theme/icon-m-camera-video"
 
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.right: parent.right
+
+        hMargin: 6
+        vMargin: 6
 
         width: modeButton.height
 
