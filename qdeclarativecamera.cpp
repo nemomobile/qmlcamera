@@ -659,6 +659,8 @@ void QDeclarativeCamera::keyPressEvent(QKeyEvent * event)
     case Qt::Key_ZoomOut:
     case Qt::Key_F7:
     case Qt::Key_F8:
+    case Qt::Key_VolumeUp:
+    case Qt::Key_VolumeDown:
         // Check if usage of zoom keys is allowed
         if(m_resourcesStatus != QDeclarativeCamera::ResourcesGranted)
             return;
@@ -700,6 +702,8 @@ void QDeclarativeCamera::keyReleaseEvent(QKeyEvent * event)
     case Qt::Key_ZoomOut:
     case Qt::Key_F7:
     case Qt::Key_F8:
+    case Qt::Key_VolumeUp:
+    case Qt::Key_VolumeDown:
         // Check if usage of zoom keys is allowed
         if( m_resourcesStatus != QDeclarativeCamera::ResourcesGranted)
             return;

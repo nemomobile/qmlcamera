@@ -242,13 +242,13 @@ Rectangle {
                     camera.captureImage();
                 }
 
-            } else if (event.key == Qt.Key_ZoomIn || event.key == Qt.Key_F7  ) {
+            } else if (event.key == Qt.Key_ZoomIn || event.key == Qt.Key_F7 || event.key == Qt.Key_VolumeDown ) {
                 // Zoom in
                 event.accepted = true;
                 zoomOutAnimation.stop();
                 zoomInAnimation.duration = 4000 - camera.digitalZoom / Math.min(4.0, camera.maximumDigitalZoom) * 4000;
                 zoomInAnimation.start();
-            } else if (event.key == Qt.Key_ZoomOut || event.key == Qt.Key_F8 ) {
+            } else if (event.key == Qt.Key_ZoomOut || event.key == Qt.Key_F8 || event.key == Qt.Key_VolumeUp ) {
                 // Zoom out
                 event.accepted = true;
                 zoomInAnimation.stop();
@@ -258,11 +258,11 @@ Rectangle {
         }
         
         Keys.onReleased : {
-            if (event.key == Qt.Key_ZoomIn || event.key == Qt.Key_F7  ) {
+            if (event.key == Qt.Key_ZoomIn || event.key == Qt.Key_F7 || event.key == Qt.Key_VolumeDown ) {
                 // Zoom in
                 event.accepted = true;
                 zoomInAnimation.stop();
-            } else if (event.key == Qt.Key_ZoomOut || event.key == Qt.Key_F8) {
+            } else if (event.key == Qt.Key_ZoomOut || event.key == Qt.Key_F8 || event.key == Qt.Key_VolumeUp) {
 			    // Zoom out
 			    event.accepted = true;
 			    zoomOutAnimation.stop();
