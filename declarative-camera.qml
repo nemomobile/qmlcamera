@@ -381,9 +381,6 @@ Rectangle {
         propertyPopup: cameraPropertyPopup
 
         quickSettingsVisible : cameraUI.state == "Capture"
-
-        onHomePressed: mainWindow.showMinimized()
-        onQuitPressed: Qt.quit()
     }
 
     BottomPane {

@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>declarative-camera.qml</file>
-        <file>CameraPropertyPopup.qml</file>>
+        <file>CameraPropertyPopup.qml</file>
         <file>CaptureControls.qml</file>
         <file>PhotoPreview.qml</file>
         <file>ZoomControl.qml</file>
@@ -12,7 +12,7 @@
         <file>CameraPropertyButton.qml</file>
         <file>CameraPropertyModel.qml</file>
         <file>images/camera_camera_setting.png</file>
-        <file>images/icon-m-camera-flash-auto-screen.svg</file> 
+        <file>images/icon-m-camera-flash-auto-screen.svg</file>
         <file>images/icon-m-camera-flash-off-screen.svg</file>
         <file>images/icon-m-camera-flash-always-screen.svg</file>
         <file>images/icon-m-camera-flash-red-eye-screen.svg</file>
@@ -21,14 +21,11 @@
         <file>images/icon-m-camera-whitebalance-cloudy-screen.svg</file>
         <file>images/icon-m-camera-whitebalance-sunny-screen.svg</file>
         <file>images/icon-m-camera-whitebalance-tungsten-screen.svg</file>
-        <file>images/icon-m-framework-home.svg</file>
-	<file>images/icon-m-toolbar-delete.svg</file>
+        <file>images/icon-m-toolbar-delete.svg</file>
         <file>images/icon-m-toolbar-camera.svg</file>
-        <file>images/icon-m-framework-close.svg</file>
         <file>images/icon-m-camera-ongoing-recording.svg</file>
         <file>images/icon-m-camera-pause.svg</file>
         <file>images/icon-m-camera-pause-indication.svg</file>
-        <file>images/icon-m-camera-video.svg</file>
         <file>images/icon-m-camera-video-record.svg</file>
         <file>images/icon-m-camera-video.svg</file>
         <file>images/icon-m-toolbar-gallery.svg</file>
