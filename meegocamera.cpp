@@ -64,6 +64,7 @@ MeegoCamera::MeegoCamera(bool visible): QObject(),
 
     //qDebug() << Q_FUNC_INFO << "gpio device opened";
 
+#ifdef CUSTOM_RESOURCES
     m_cameraForegroundResources = new ResourcePolicy::ResourceSet("camera", this);
     m_cameraForegroundResources->setAlwaysReply();
 
@@ -88,6 +89,9 @@ MeegoCamera::MeegoCamera(bool visible): QObject(),
     m_cameraBackgroundResources->addResource(ResourcePolicy::SnapButtonType);
 
     //qDebug() << Q_FUNC_INFO << "volume key resource connected";
+#else
+    m_resourcesGranted = true;
+#endif
 
     m_coverState = !getSwitchState(m_gpioFile, 9);
 
@@ -101,8 +105,10 @@ MeegoCamera::~MeegoCamera()
 {
     //qDebug() << Q_FUNC_INFO;
 
+#ifdef CUSTOM_RESOURCES
     m_cameraForegroundResources->release();
     m_cameraBackgroundResources->release();
+#endif
 
     //qDebug() << Q_FUNC_INFO << "volume ker resource released";
 
@@ -289,6 +295,7 @@ bool MeegoCamera::isVideoCaptureSupported() const
 void MeegoCamera::updateResources()
 {
 
+#ifdef CUSTOM_RESOURCES
     if(m_uiVisible && m_view && m_view->isActiveWindow()) {
         m_cameraBackgroundResources->release();
         m_cameraForegroundResources->acquire();
@@ -296,6 +303,7 @@ void MeegoCamera::updateResources()
         m_cameraForegroundResources->release();
         m_cameraBackgroundResources->acquire();
     }
+#endif
 
 }
 
@@ -380,6 +388,7 @@ void MeegoCamera::deleteImage()
     QFile::remove( m_view->rootObject()->property("imagePath").toString());
 }
 
+#ifdef CUSTOM_RESOURCES
 void MeegoCamera::resourcesGranted(const QList<ResourcePolicy::ResourceType>& /*grantedOptionalResources*/)
 {
     m_resourcesGranted = true;
@@ -394,4 +403,5 @@ void MeegoCamera::lostResources()
 {
     m_resourcesGranted = false;
 }
+#endif
 

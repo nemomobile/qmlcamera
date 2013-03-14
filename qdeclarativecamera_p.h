@@ -51,7 +51,9 @@
 #include <qcameraimageprocessing.h>
 #include <qcameraimagecapture.h>
 #include <qmediarecorder.h>
+#ifdef CUSTOM_RESOURCES
 #include <policy/resource-set.h>
+#endif
 
 
 
@@ -364,10 +366,12 @@ private Q_SLOTS:
     void _q_updateImageSettings();
     void _q_applyPendingState();
 
+#ifdef CUSTOM_RESOURCES
     // Resource Policy Framework callbacks
     void _q_resourcesGranted(const QList<ResourcePolicy::ResourceType>& grantedOptionalResources);
     void _q_resourcesDenied();
     void _q_lostResources();
+#endif
 
 private:
 
@@ -400,7 +404,9 @@ private:
     bool m_isStateSet;
     bool m_isValid;
 
+#ifdef CUSTOM_RESOURCES
     ResourcePolicy::ResourceSet* m_cameraResources;
+#endif
     ResourcesStatus m_resourcesStatus;
     bool m_videoRecordingResourcesAvailable;
 };

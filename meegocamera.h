@@ -10,7 +10,9 @@
 #include <linux/input.h>
 #include <stdint.h>
 #include <QtDeclarative/QDeclarativeView>
+#ifdef CUSTOM_RESOURCES
 #include <policy/resource-set.h>
+#endif
 
 
 #define SERVER_NAME "/tmp/meegocamera"
@@ -43,10 +45,12 @@ private slots:
     void disconnected();
     void deleteImage();
 
+#ifdef CUSTOM_RESOURCES
     // Resource Policy Framework callbacks
     void resourcesGranted(const QList<ResourcePolicy::ResourceType>& grantedOptionalResources);
     void resourcesDenied();
     void lostResources();
+#endif
 
 private:
     void HandleGpioKeyEvent(struct input_event &ev);
@@ -73,8 +77,10 @@ private:
 
     QDeclarativeView *m_view;
 
+#ifdef CUSTOM_RESOURCES
     ResourcePolicy::ResourceSet* m_cameraForegroundResources;
     ResourcePolicy::ResourceSet* m_cameraBackgroundResources;
+#endif
     bool m_resourcesGranted;
 };
 

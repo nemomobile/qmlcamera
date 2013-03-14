@@ -1,8 +1,15 @@
 TEMPLATE=app
 
-CONFIG += mobility link_pkgconfig
+CONFIG += mobility
 
-PKGCONFIG += libresourceqt1
+# If CUSTOM_RESOURCES is set implement resource policy handling
+# in meego-handset-camera. Otherwise let qt-mobility handle
+# resources.
+count(CUSTOM_RESOURCES, 1) {
+    CONFIG += link_pkgconfig
+    PKGCONFIG += libresourceqt1
+    DEFINES += CUSTOM_RESOURCES
+}
 
 
 DEFINES+=Q_WS_MEEGO

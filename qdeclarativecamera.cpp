@@ -305,6 +305,7 @@ QDeclarativeCamera::QDeclarativeCamera(QDeclarativeItem *parent) :
     m_exposure = m_camera->exposure();
     m_focus = m_camera->focus();
 
+#ifdef CUSTOM_RESOURCES
     m_cameraResources = new ResourcePolicy::ResourceSet("camera", this);
     m_cameraResources->setAlwaysReply();
 
@@ -314,6 +315,7 @@ QDeclarativeCamera::QDeclarativeCamera(QDeclarativeItem *parent) :
     connect(m_cameraResources, SIGNAL(resourcesDenied()), this, SLOT(_q_resourcesDenied()));
     connect(m_cameraResources, SIGNAL(lostResources()), this, SLOT(_q_lostResources()));
 
+#endif
 
     connect(m_viewfinderItem, SIGNAL(nativeSizeChanged(QSizeF)),
             this, SLOT(_q_nativeSizeChanged(QSizeF)));
@@ -360,7 +362,9 @@ QDeclarativeCamera::QDeclarativeCamera(QDeclarativeItem *parent) :
 
 QDeclarativeCamera::~QDeclarativeCamera()
 {
+#ifdef CUSTOM_RESOURCES
     m_cameraResources->release();
+#endif
 
     if (m_isValid) {
         m_camera->unload();
@@ -463,6 +467,10 @@ void QDeclarativeCamera::setCameraState(QDeclarativeCamera::State state)
 
     QDeclarativeCamera::ResourcesStatus oldResStatus = m_resourcesStatus;
 
+#ifndef CUSTOM_RESOURCES
+    m_resourcesStatus = QDeclarativeCamera::ResourcesGranted;
+#endif
+
     switch (state) {
     case QDeclarativeCamera::ActiveState:
     case QDeclarativeCamera::LoadedState:
@@ -475,14 +483,19 @@ void QDeclarativeCamera::setCameraState(QDeclarativeCamera::State state)
             }
         } else if(m_resourcesStatus == QDeclarativeCamera::ResourcesNotNeeded) {
             m_resourcesStatus = QDeclarativeCamera::ResourcesAcquiring;
+#ifdef CUSTOM_RESOURCES
             m_cameraResources->acquire();
+#endif
+
         }
         // else: In case of ResourcesAcquiring and ResourcesDenied nothing needs to be
         //       done here. Camera is set to correct state in resourcesGranted() method.
         break;
     case QDeclarativeCamera::UnloadedState:
         m_camera->unload();
+#ifdef CUSTOM_RESOURCES
         m_cameraResources->release();
+#endif
         m_resourcesStatus = QDeclarativeCamera::ResourcesNotNeeded;
         break;
     }
@@ -1053,6 +1066,7 @@ void QDeclarativeCamera::setManualWhiteBalance(int colorTemp) const
     }
 }
 
+#ifdef CUSTOM_RESOURCES
 void QDeclarativeCamera::_q_resourcesGranted(const QList<ResourcePolicy::ResourceType>& grantedOptionalResources)
 {
     QDeclarativeCamera::ResourcesStatus oldStatus = m_resourcesStatus;
@@ -1089,7 +1103,9 @@ void QDeclarativeCamera::_q_resourcesGranted(const QList<ResourcePolicy::Resourc
     if(oldStatus != m_resourcesStatus)
         emit resourcesStatusChanged(m_resourcesStatus);
 }
+#endif
 
+#ifdef CUSTOM_RESOURCES
 void QDeclarativeCamera::_q_resourcesDenied()
 {
     m_videoRecordingResourcesAvailable = false;
@@ -1101,14 +1117,18 @@ void QDeclarativeCamera::_q_resourcesDenied()
 
     m_camera->unload();
 }
+#endif
 
+#ifdef CUSTOM_RESOURCES
 void QDeclarativeCamera::_q_lostResources()
 {
     _q_resourcesDenied();
 }
+#endif
 
 void QDeclarativeCamera::updateResources()
 {
+#ifdef CUSTOM_RESOURCES
     QDeclarativeCamera::ResourcesStatus oldStatus = m_resourcesStatus;
 
     // Scale button reources for zooming
@@ -1170,6 +1190,7 @@ void QDeclarativeCamera::updateResources()
 
     // This will trigger new resources granted message if/when resources are available
     m_cameraResources->update();
+#endif
 }
 
 /*!
