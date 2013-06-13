@@ -7,10 +7,6 @@ License: Apache License, Version 2.0
 URL: www.meego.com
 Sources:
      - meego-handset-camera-%{version}.tar.bz2
-     - camera-screenshot.png
-Patches:
-     - 0001-Removed-Home-and-Quit-buttons-fixes-NEMO-111.patch
-     - use-qcamera-resource-handling.patch
 SourcePrefix: "%{name}-%{version}"
 Description: |
     meego-handset-camera provides very basic camera features such as still capture,
