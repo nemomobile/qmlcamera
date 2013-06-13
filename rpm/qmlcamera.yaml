@@ -1,16 +1,17 @@
-Name: meego-handset-camera
-Summary: MeeGo Handset camera application
+Name: qmlcamera
+Summary: Camera application for Nemo Mobile
 Version: 1.0.7
 Release: 1
 Group: System/GUI/Other
 License: Apache License, Version 2.0
 URL: https://github.com/nemomobile/qmlcamera
 Sources:
-     - meego-handset-camera-%{version}.tar.bz2
-SourcePrefix: "%{name}-%{version}"
-Description: |
-    meego-handset-camera provides very basic camera features such as still capture,
-    zooming, adjusting white balance, EV componesation and flash settings.
+    - "%{name}-%{version}.tar.bz2"
+Provides:
+    - meego-handset-camera >= 1.0.7
+Obsoletes:
+    - meego-handset-camera < 1.0.7
+Description: "%{summary}."
 Requires:
     - gst-plugins-camera
     - gstreamer >= 0.10.32
@@ -30,4 +31,4 @@ Builder: qmake
 Files:
 - "%{_bindir}/meego-handset-camera"
 - "%{_datadir}/applications/meegocamera.desktop"
-- "%config %{_sysconfdir}/xdg/Nokia/%{name}.conf"
+- "%config %{_sysconfdir}/xdg/Nokia/meego-handset-camera.conf"
