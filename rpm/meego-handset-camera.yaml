@@ -1,0 +1,37 @@
+Name: meego-handset-camera
+Summary: MeeGo Handset camera application
+Version: 1.0.7
+Release: 1
+Group: System/GUI/Other
+License: Apache License, Version 2.0
+URL: www.meego.com
+Sources:
+     - meego-handset-camera-%{version}.tar.bz2
+     - camera-screenshot.png
+Patches:
+     - 0001-Removed-Home-and-Quit-buttons-fixes-NEMO-111.patch
+     - use-qcamera-resource-handling.patch
+SourcePrefix: "%{name}-%{version}"
+Description: |
+    meego-handset-camera provides very basic camera features such as still capture,
+    zooming, adjusting white balance, EV componesation and flash settings.
+Requires:
+    - gst-plugins-camera
+    - gstreamer >= 0.10.32
+    - libdeclarative-multimedia
+    # Without gst-plugins-good trying to capture image will result on Error text.
+    - gst-plugins-good
+PkgConfigBR:
+    - QtGui
+    - QtOpenGL
+    - QtDeclarative
+    - QtNetwork
+    - QtMultimediaKit
+PkgBR:
+    - qt-devel-tools
+Configure: none
+Builder: qmake
+Files:
+- "%{_bindir}/meego-handset-camera"
+- "%{_datadir}/applications/meegocamera.desktop"
+- "%config %{_sysconfdir}/xdg/Nokia/%{name}.conf"

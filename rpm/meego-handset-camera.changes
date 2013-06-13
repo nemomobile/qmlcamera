@@ -1,0 +1,64 @@
+* Tue Mar 26 2013 Juho Hämäläinen <juho.hamalainen@tieto.com> - 1.0.7
+- Disable resource handling and let qt-mobility handle resources.
+
+* Thu Jan 10 2013 Marko Saukko <marko.saukko@jollamobile.com> - 1.0.7
+- Updated packaging.
+
+* Thu Aug 02 2012 Vadim Frolov <vadim.frolov@gmail.com> - 1.0.7
+- Remove Home and Quit buttons (fixes NEMO#111).
+
+* Wed Nov 16 2011 Marko Saukko <marko.saukko@cybercom.com> - 1.0.7
+- Added install dependency to gst-plugins-good.
+
+* Thu Nov 03 2011 Marko Saukko <marko.saukko@cybercom.com> - 1.0.7
+- Added missing dependency to libdeclarative-multimedia.
+
+* Fri Sep 23 2011 Teemu Tuominen <teemu.tuominen@cybercom.com> - 1.0.7
+- added volume up/down keydefines to zoom control
+  (due n950 difference in keymapping)
+- changed tarball compression to bzip2 
+
+* Thu Aug 25 2011 Joonas Tanskanen <joonas.tanskanen@sasken.com> - 1.0.6
+- Focusing when the user taps the screen added
+
+* Fri Aug 19 2011 Joonas Tanskanen <joonas.tanskanen@sasken.com> - 1.0.5
+- Previously taken picture can now be removed by using new trashcan icon  
+  in photo preview view
+- Setting popup can now be closed by touching outside of the popup
+- Camera UI integrated with Resource Policy Framework
+- Camera mode added to settings, the UI launched to mode it was when closed last time
+- Record button no longer shown if the camera is not active
+
+* Thu Aug 3 2011 Joonas Tanskanen <joonas.tanskanen@sasken.com> - 1.0.4
+- Layout of setting controls improved and moved to upper part of the view 
+- View button replaced with new image button and moved to lower left corner
+- Capture button replaced with new image button
+- Initial and experimental support for video capture. The feature is enabled
+  only if ti-dsp codecs are in use.
+- Qt Mobility's qml camera element no longer used. The qml camera element
+  is now implemented in meego-handset-camera app as a local qml element (copied
+  from Qt Mobility) and modified to support video capture.
+
+* Thu Jun 1 2011 Joonas Tanskanen <joonas.tanskanen@sasken.com> - 1.0.3
+- BMC#15852 (It is possible to take picture with closed lens cover) fixed
+- Stop camera pipeline when lens cover is closed or the camera UI is in background
+- Hide menus and show "Standby" text when camera pipeline is not running and/or the camera UI
+  minimized to task switcher
+- Show "Lens cover closed" text instead of view finder when lens cover is closed
+- Prevent image capture/zooming when lens cover is closed
+- Home icon added to minimize camera UI to task switcher
+- Add viewfinder resolution setting to config file
+
+* Thu May 19 2011 Joonas Tanskanen <joonas.tanskanen@sasken.com> - 1.0.2
+- UI side changes to support new camera features (BMC#15678)
+- Add default capture resolution to config file
+- Changed default capture resolution as 1296x976
+- Support for focus key (half pressed camera key)
+- Switching UI background/foreground according to lens cover event
+
+* Wed May 18 2011 Joonas Tanskanen <joonas.tanskanen@sasken.com> - 1.0.1 
+- Acquiring access to ScaleButtonResource (zoom keys) thourg Resource Policy API added (BMC#16707)
+
+* Wed May 17 2011 Joonas Tanskanen <joonas.tanskanen@sasken.com> - 1.0 
+- meego-handset-camera created
+
