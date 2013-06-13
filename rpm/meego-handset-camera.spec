@@ -13,7 +13,7 @@ Version:    1.0.7
 Release:    1
 Group:      System/GUI/Other
 License:    Apache License, Version 2.0
-URL:        www.meego.com
+URL:        https://github.com/nemomobile/qmlcamera
 Source0:    meego-handset-camera-%{version}.tar.bz2
 Source100:  meego-handset-camera.yaml
 Requires:   gst-plugins-camera
